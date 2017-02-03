@@ -2,6 +2,7 @@ name: aws-dev
 channels:
 - defaults
 - conda-forge
+- http://conda.anaconda.org/babbel
 dependencies:
 - _nb_ext_conf=0.3.0=py35_0
 - anaconda-client=1.6.0=py35_0
@@ -67,6 +68,8 @@ dependencies:
 - yaml=0.1.6=0
 - zlib=1.2.8=3
 - pip:
+  - awscli==1.11.44
+  - colorama==0.3.7
   - ipython-genutils==0.1.0
   - jupyter-client==4.4.0
   - jupyter-console==5.0.0
@@ -75,4 +78,7 @@ dependencies:
   - nb-conda==2.0.0
   - nb-conda-kernels==2.0.0
   - prompt-toolkit==1.0.9
+  - pyasn1==0.1.9
+  - rsa==3.4.2
+  - s3transfer==0.1.10
   - troposphere==1.9.0
