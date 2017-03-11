@@ -1,5 +1,5 @@
 # boto notebooks
-boto/.ipynb_checkpoints/
+boto3/.ipynb_checkpoints/
 
 # Pycharm
 /.idea
