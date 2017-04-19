@@ -1,9 +1,15 @@
 import boto3
+import os
 
-session = boto3.Session(profile_name='nicor88-aws-dev')
+os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
 
-# s3
-s3 = session.client('s3')
+
+s3 = boto3.client('s3')
+
+# using sessions
+# session = boto3.Session(profile_name='nicor88-aws-dev')
+# s3 = session.client('s3')
+
 # get all the buckets
 buckets = s3.list_buckets()
 
