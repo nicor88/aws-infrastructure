@@ -1,1 +1,0 @@
-# EMR (Elastic Map Reduce)
