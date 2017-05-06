@@ -1,0 +1,8 @@
+stack_name: 'DevServer'
+
+ec2:
+  instance_type: 't2.micro'
+  ami_version: '' #TODO look ubuntu
+
+network:
+  vpc_id: 'vpc_id'
