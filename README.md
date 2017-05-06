@@ -9,7 +9,7 @@ source activate aws-dev
 The env contain also **aws cli**
 
 After installing a new package update the env file:
-<pre>conda env export > environment.yml
+<pre>conda env export > conda-env-dev.yml
 </pre>
 
 ## AWS Profiles
