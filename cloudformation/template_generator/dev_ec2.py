@@ -10,7 +10,8 @@ session = boto3.Session(profile_name='nicor88-aws-dev')
 cfn = session.client('cloudformation')
 
 # load config
-cfg = yaml.load(resource_string('cloudformation.config', 'dev_ec2.yml'))
+cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
+STACK_NAME = cfg['ec2']['stack_name']
 
 template = Template()
 description = 'Dev Server Stack Free Tier'
@@ -58,7 +59,7 @@ template_json = template.to_json(indent=4)
 print(template_json)
 
 stack_args = {
-    'StackName': cfg['stack_name'],
+    'StackName': STACK_NAME,
     'TemplateBody': template_json,
     'Tags': [
         {
@@ -72,4 +73,4 @@ cfn.validate_template(TemplateBody=template_json)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
-# cfn.delete_stack(StackName=cfn['stack_name'])
+# cfn.delete_stack(StackName=STACK_NAME)

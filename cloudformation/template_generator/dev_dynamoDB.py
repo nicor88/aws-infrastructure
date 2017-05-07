@@ -2,7 +2,7 @@ import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
-from troposphere import ec2
+from troposphere import dynamodb2
 from troposphere import Template, Tags, Output, Ref, Parameter
 
 # init cloudformation session
@@ -11,6 +11,8 @@ cfn = session.client('cloudformation')
 
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'dev_dynamo.yml'))
+
+STACK_NAME = cfg['dynamo']['stack_name']
 
 template = Template()
 description = 'Dev Dynamo Table'
@@ -22,7 +24,7 @@ template_json = template.to_json(indent=4)
 print(template_json)
 
 stack_args = {
-    'StackName': cfg['stack_name'],
+    'StackName': STACK_NAME,
     'TemplateBody': template_json,
     'Tags': [
         {
@@ -36,4 +38,4 @@ cfn.validate_template(TemplateBody=template_json)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
-# cfn.delete_stack(StackName=cfn['stack_name'])
+# cfn.delete_stack(StackName=STACK_NAME)
