@@ -22,13 +22,13 @@ template.add_version('2010-09-09')
 
 s3_dev_bucket = template.add_resource(
     s3.Bucket('S3DevBucket',
-              BucketName='nicor-dev-bucket'
+              BucketName='nicor-dev'
               )
 )
 
 s3_data_bucket = template.add_resource(
     s3.Bucket('S3DataBucket',
-              BucketName='nicor-data-bucket'
+              BucketName='nicor-data'
               )
 )
 
