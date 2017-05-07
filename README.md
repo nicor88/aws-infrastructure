@@ -3,13 +3,13 @@ Collection of examples in AWS
 
 ## AWS Conda Environment
 Install Anaconda o Miniconda
-<pre>conda env create -f environment.yml
+<pre>conda env create -f conda-env-dev.yml
 source activate aws-dev
 </pre>
 The env contain also **aws cli**
 
 After installing a new package update the env file:
-<pre>conda env export > environment.yml
+<pre>conda env export > conda-env-dev.yml
 </pre>
 
 ## AWS Profiles

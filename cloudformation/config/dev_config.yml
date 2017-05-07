@@ -1,0 +1,16 @@
+ec2:
+  stack_name: 'EC2-Dev'
+  instance_type: 't2.micro'
+  ami_version: '' #TODO look ubuntu
+
+dynamo:
+  stack_name: 'Dynamo-Dev'
+
+lambda:
+  stack_name: 'Lambda-Dev'
+
+network:
+  vpc_id: 'vpc_id' #TODO add vpc_id
+
+s3:
+  stack_name: 'S3-Dev'

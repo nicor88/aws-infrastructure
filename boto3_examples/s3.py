@@ -1,8 +1,8 @@
 import boto3
 import os
 
+os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
-
 
 s3 = boto3.client('s3')
 
