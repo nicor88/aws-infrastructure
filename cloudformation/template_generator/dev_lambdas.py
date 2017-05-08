@@ -56,7 +56,7 @@ lambda_execution_role = template.add_resource(
             ]},
     ))
 
-lambda_create_cluster = template.add_resource(
+hello_world_lambda = template.add_resource(
     awslambda.Function(
         'HelloWorld',
         FunctionName='hello_world',
@@ -72,6 +72,16 @@ lambda_create_cluster = template.add_resource(
         MemorySize=128
     )
 )
+
+template.add_output([
+    Output('LambdaExecutionRole',
+           Description='Lambdas Execution role',
+           Value=Ref(lambda_execution_role))])
+
+template.add_output([
+    Output('HelloWorld',
+           Description='HelloWorld Lambda function',
+           Value=Ref(hello_world_lambda))])
 
 template_json = template.to_json(indent=4)
 print(template_json)
