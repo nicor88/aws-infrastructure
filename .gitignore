@@ -3,3 +3,7 @@ boto3/.ipynb_checkpoints/
 
 # Pycharm
 /.idea
+
+# Terraform
+*.tfplan
+*.terraform
