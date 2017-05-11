@@ -3,8 +3,16 @@ stack_name: 'StreamToS3-Stack'
 s3_destination_bucket: 'nicor-data-stream'
 s3_deployment_bucket: 'nicor-dev'
 
-s3_key_lambda_stream_to_firehose: 'deployments/lambdas/link_kinesis_stream_to_firehose.zip'
-
 kinesis_stream_name: 'DevStream'
 kinesis_delivery_stream_name: 'DevDeliveryStream'
+firehose_interval_secs: 60
+firehose_buffer_mb: 5
+firehose_compression_format: UNCOMPRESSED
+
 lambda_function_name: 'link_kinesis_stream_to_firehose'
+s3_key_lambda_stream_to_firehose: 'deployments/lambdas/link_kinesis_stream_to_firehose.zip'
+lambda_batch_size: 100
+lambda_memory_size: 128
+lambda_timeout: 30
+lambda_enabled: True
+lambda_starting_position: TRIM_HORIZON

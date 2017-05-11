@@ -34,7 +34,7 @@ kinesis_stream = template.add_resource(
                        StackName=Ref('AWS::StackName'),
                        Name='DevStream'
                    )
-    )
+                   )
 )
 
 firohose_delivery_role = template.add_resource(
@@ -93,10 +93,13 @@ kinesis_delivery_stream = template.add_resource(
                                                                 Prefix='delivery_stream/',
                                                                 RoleARN=GetAtt(
                                                                     firohose_delivery_role, 'Arn'),
-                                                                BufferingHints=firehose.BufferingHints(
+                                                                BufferingHints=
+                                                                firehose.BufferingHints(
                                                                     'BufferingSetup',
-                                                                    IntervalInSeconds=60,
-                                                                    SizeInMBs=5)
+                                                                    IntervalInSeconds=cfg[
+                                                                        'firehose_interval_secs'],
+                                                                    SizeInMBs=cfg[
+                                                                        'firehose_buffer_mb'])
                                                                 ),
 
                             )
@@ -137,7 +140,8 @@ lambda_execution_role = template.add_resource(
                             Action=[
                                 Action('firehose', '*'),
                             ],
-                            Resource=['arn:aws:firehose:*:*:deliverystream/{}'.format(cfg['kinesis_delivery_stream_name'])]
+                            Resource=['arn:aws:firehose:*:*:deliverystream/{}'.format(
+                                cfg['kinesis_delivery_stream_name'])]
                         )
                     ]
                 }
@@ -165,24 +169,23 @@ lambda_stream_to_firehose = template.add_resource(
             S3Key=cfg['s3_key_lambda_stream_to_firehose'],
         ),
         Runtime='python3.6',
-        Timeout='30',
-        MemorySize=128,
+        Timeout=cfg['lambda_timeout'],
+        MemorySize=cfg['lambda_memory_size'],
         Environment=awslambda.Environment('LambdaVars',
-                                          Variables={'DELIVERY_STREAM': cfg[
-                                              'kinesis_delivery_stream_name']})
+                                          Variables=
+                                          {'DELIVERY_STREAM': cfg['kinesis_delivery_stream_name']})
     )
 )
 
 add_kinesis_trigger_for_lambda = template.add_resource(
     awslambda.EventSourceMapping('KinesisLambdaTrigger',
-                                 BatchSize=100,
-                                 Enabled=True,
+                                 BatchSize=cfg['lambda_batch_size'],
+                                 Enabled=cfg['lambda_enabled'],
                                  FunctionName=cfg['lambda_function_name'],
-                                 StartingPosition='TRIM_HORIZON',
+                                 StartingPosition=cfg['lambda_starting_position'],
                                  EventSourceArn=GetAtt(kinesis_stream, 'Arn')
                                  )
 )
-
 
 template_json = template.to_json(indent=4)
 print(template_json)
