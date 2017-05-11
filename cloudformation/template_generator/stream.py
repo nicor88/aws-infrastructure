@@ -37,29 +37,6 @@ kinesis_stream = template.add_resource(
     )
 )
 
-firehose_policy_doc = {
-    'Statement': [{
-        'Sid': 'S3Access',
-        'Effect': 'Allow',
-        'Action': [
-            's3:*',
-        ],
-        'Resource': [
-                "arn:aws:s3:::{}".format(cfg['s3_destination_bucket']),
-                "arn:aws:s3:::{}/*".format(cfg['s3_destination_bucket'])
-            ]
-    },
-        {
-            'Sid': 'Logs',
-            'Effect': 'Allow',
-            'Action': [
-                'logs:*'
-            ],
-            'Resource': ['*']
-        }
-    ]
-}
-
 firohose_delivery_role = template.add_resource(
     iam.Role(
         'FirehoseRole',
@@ -76,8 +53,31 @@ firohose_delivery_role = template.add_resource(
         },
         Policies=[
             iam.Policy(
-                PolicyName='Access',
-                PolicyDocument=firehose_policy_doc,
+                PolicyName='AccessToS3andLogs',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Sid='S3Access',
+                            Effect=Allow,
+                            Action=[
+                                Action('s3', '*')
+                            ],
+                            Resource=[
+                                "arn:aws:s3:::{}".format(cfg['s3_destination_bucket']),
+                                "arn:aws:s3:::{}/*".format(cfg['s3_destination_bucket'])
+                            ]
+                        ),
+                        Statement(
+                            Sid='Logs',
+                            Effect=Allow,
+                            Action=[
+                                Action('logs', '*'),
+                            ],
+                            Resource=['*']
+                        )
+                    ]
+                }
             )
         ]
     ))
@@ -87,16 +87,16 @@ kinesis_delivery_stream = template.add_resource(
                             DeliveryStreamName=cfg['kinesis_delivery_stream_name'],
                             S3DestinationConfiguration=
                             firehose.S3DestinationConfiguration('DestinationBucketConfig',
-                                                                BucketARN="arn:aws:s3:::{}".format(cfg['s3_destination_bucket']),
+                                                                BucketARN="arn:aws:s3:::{}".format(
+                                                                    cfg['s3_destination_bucket']),
                                                                 CompressionFormat='UNCOMPRESSED',
                                                                 Prefix='delivery_stream/',
-                                                                RoleARN=GetAtt(firohose_delivery_role, 'Arn'),
+                                                                RoleARN=GetAtt(
+                                                                    firohose_delivery_role, 'Arn'),
                                                                 BufferingHints=firehose.BufferingHints(
                                                                     'BufferingSetup',
                                                                     IntervalInSeconds=60,
-                                                                    # 5 minutes
                                                                     SizeInMBs=5)
-
                                                                 ),
 
                             )
@@ -109,7 +109,7 @@ lambda_execution_role = template.add_resource(
         Path='/',
         Policies=[
             iam.Policy(
-                PolicyName='AllNeededPolicy',
+                PolicyName='KinesisToFirehosePolicy',
                 PolicyDocument={
                     "Version": "2012-10-17",
                     "Statement": [
@@ -121,7 +121,7 @@ lambda_execution_role = template.add_resource(
                                 Action('logs', 'CreateLogStream'),
                                 Action('logs', 'PutLogEvents')
                             ],
-                            Resource=["arn:aws:logs:*:*:*"]
+                            Resource=['arn:aws:logs:*:*:*']
                         ),
                         Statement(
                             Sid='KinesisStream',
@@ -137,10 +137,11 @@ lambda_execution_role = template.add_resource(
                             Action=[
                                 Action('firehose', '*'),
                             ],
-                            Resource=["arn:aws:firehose:*:*:deliverystream/{}".format(cfg['kinesis_delivery_stream_name'])]
+                            Resource=['arn:aws:firehose:*:*:deliverystream/{}'.format(cfg['kinesis_delivery_stream_name'])]
                         )
                     ]
-                }),
+                }
+            )
         ],
         AssumeRolePolicyDocument={
             "Version": "2012-10-17",
