@@ -137,7 +137,7 @@ lambda_execution_role = template.add_resource(
                             Action=[
                                 Action('firehose', '*'),
                             ],
-                            Resource=["arn:aws:firehose:*:*:*"]
+                            Resource=["arn:aws:firehose:*:*:deliverystream/{}".format(cfg['kinesis_delivery_stream_name'])]
                         )
                     ]
                 }),
