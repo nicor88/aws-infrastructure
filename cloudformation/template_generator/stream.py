@@ -42,9 +42,7 @@ firehose_policy_doc = {
         'Sid': 'S3Access',
         'Effect': 'Allow',
         'Action': [
-            's3:ListBucket',
-            's3:GetBucketLocation',
-            's3:ListAllMyBuckets',
+            's3:*',
         ],
         'Resource': [
                 "arn:aws:s3:::{}".format(cfg['s3_destination_bucket']),
@@ -55,7 +53,7 @@ firehose_policy_doc = {
             'Sid': 'Logs',
             'Effect': 'Allow',
             'Action': [
-                'logs:PutLogEvents'
+                'logs:*'
             ],
             'Resource': ['*']
         }
@@ -88,12 +86,11 @@ kinesis_delivery_stream = template.add_resource(
     firehose.DeliveryStream('DeliveryStream',
                             DeliveryStreamName=cfg['kinesis_delivery_stream_name'],
                             S3DestinationConfiguration=
-                            firehose.S3DestinationConfiguration('S3DestinationBucket',
-                                                                BucketARN="arn:aws:s3:::{}".format(
-                                                                    cfg['s3_destination_bucket']),
+                            firehose.S3DestinationConfiguration('DestinationBucketConfig',
+                                                                BucketARN="arn:aws:s3:::{}".format(cfg['s3_destination_bucket']),
                                                                 CompressionFormat='UNCOMPRESSED',
-                                                                Prefix='deelivery_stream/',
-                                                                RoleARN=Ref(firohose_delivery_role),
+                                                                Prefix='delivery_stream/',
+                                                                RoleARN=GetAtt(firohose_delivery_role, 'Arn'),
                                                                 BufferingHints=firehose.BufferingHints(
                                                                     'BufferingSetup',
                                                                     IntervalInSeconds=60,
@@ -105,7 +102,7 @@ kinesis_delivery_stream = template.add_resource(
                             )
 )
 
-
+# lambda section
 lambda_execution_role = template.add_resource(
     iam.Role(
         'ExecutionRole',
@@ -124,7 +121,7 @@ lambda_execution_role = template.add_resource(
                                 Action('logs', 'CreateLogStream'),
                                 Action('logs', 'PutLogEvents')
                             ],
-                            Resource=["arn:aws:logs:*:*:*"]  #TODO restrict
+                            Resource=["arn:aws:logs:*:*:*"]
                         ),
                         Statement(
                             Sid='KinesisStream',
@@ -132,7 +129,7 @@ lambda_execution_role = template.add_resource(
                             Action=[
                                 Action('kinesis', '*'),
                             ],
-                            Resource=["arn:aws:kinesis:*:*:*"]  #TODO restrict
+                            Resource=[GetAtt(kinesis_stream, 'Arn')]
                         ),
                         Statement(
                             Sid='DeliveryStream',
@@ -140,7 +137,7 @@ lambda_execution_role = template.add_resource(
                             Action=[
                                 Action('firehose', '*'),
                             ],
-                            Resource=["arn:aws:firehose:*:*:*"] #TODO restrict
+                            Resource=["arn:aws:firehose:*:*:*"]
                         )
                     ]
                 }),
@@ -178,10 +175,10 @@ lambda_stream_to_firehose = template.add_resource(
 add_kinesis_trigger_for_lambda = template.add_resource(
     awslambda.EventSourceMapping('KinesisLambdaTrigger',
                                  BatchSize=100,
-                                 Enabled=False,
+                                 Enabled=True,
                                  FunctionName=cfg['lambda_function_name'],
                                  StartingPosition='TRIM_HORIZON',
-                                 EventSourceArn=Ref(kinesis_stream)
+                                 EventSourceArn=GetAtt(kinesis_stream, 'Arn')
                                  )
 )
 
