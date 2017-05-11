@@ -15,7 +15,7 @@ cfg = yaml.load(resource_string('cloudformation.config', 'stream_config.yml'))
 STACK_NAME = cfg['stack_name']
 
 template = Template()
-description = 'Dev Lambdas'
+description = 'Stack containing kinesis and firehose writing to S3'
 template.add_description(description)
 # AWSTemplateFormatVersion
 template.add_version('2010-09-09')
@@ -62,8 +62,7 @@ firehose_policy_doc = {
     ]
 }
 
-#todo add proper setup
-firohose_delivery_rol = template.add_resource(
+firohose_delivery_role = template.add_resource(
     iam.Role(
         'FirehoseRole',
         AssumeRolePolicyDocument={
@@ -79,7 +78,7 @@ firohose_delivery_rol = template.add_resource(
         },
         Policies=[
             iam.Policy(
-                PolicyName='',
+                PolicyName='Access',
                 PolicyDocument=firehose_policy_doc,
             )
         ]
@@ -94,10 +93,10 @@ kinesis_delivery_stream = template.add_resource(
                                                                     cfg['s3_destination_bucket']),
                                                                 CompressionFormat='UNCOMPRESSED',
                                                                 Prefix='deelivery_stream/',
-                                                                RoleARN=Ref(firohose_delivery_rol),
+                                                                RoleARN=Ref(firohose_delivery_role),
                                                                 BufferingHints=firehose.BufferingHints(
                                                                     'BufferingSetup',
-                                                                    IntervalInSeconds=300,
+                                                                    IntervalInSeconds=60,
                                                                     # 5 minutes
                                                                     SizeInMBs=5)
 
@@ -158,9 +157,9 @@ lambda_execution_role = template.add_resource(
 
 lambda_stream_to_firehose = template.add_resource(
     awslambda.Function(
-        'HelloWorld',
-        FunctionName='hello_world',
-        Description='Hello world lambdas with Python 3.6',
+        'KinesisStreamToFirehose',
+        FunctionName=cfg['lambda_function_name'],
+        Description='Lambda function to read kinesis stream and put to firehose',
         Handler='lambda_function.lambda_handler',
         Role=GetAtt('ExecutionRole', 'Arn'),
         Code=awslambda.Code(
@@ -174,6 +173,16 @@ lambda_stream_to_firehose = template.add_resource(
                                           Variables={'DELIVERY_STREAM': cfg[
                                               'kinesis_delivery_stream_name']})
     )
+)
+
+add_kinesis_trigger_for_lambda = template.add_resource(
+    awslambda.EventSourceMapping('KinesisLambdaTrigger',
+                                 BatchSize=100,
+                                 Enabled=False,
+                                 FunctionName=cfg['lambda_function_name'],
+                                 StartingPosition='TRIM_HORIZON',
+                                 EventSourceArn=Ref(kinesis_stream)
+                                 )
 )
 
 
@@ -195,3 +204,7 @@ stack_args = {
 }
 
 cfn.validate_template(TemplateBody=template_json)
+
+# cfn.create_stack(**stack_args)
+# cfn.update_stack(**stack_args)
+# cfn.delete_stack(StackName=STACK_NAME)
