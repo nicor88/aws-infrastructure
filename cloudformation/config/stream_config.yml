@@ -7,3 +7,4 @@ s3_key_lambda_stream_to_firehose: 'deployments/lambdas/link_kinesis_stream_to_fi
 
 kinesis_stream_name: 'DevStream'
 kinesis_delivery_stream_name: 'DevDeliveryStream'
+lambda_function_name: 'link_kinesis_stream_to_firehose'
