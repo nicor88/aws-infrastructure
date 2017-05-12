@@ -16,3 +16,4 @@ lambda_memory_size: 128
 lambda_timeout: 30
 lambda_enabled: True
 lambda_starting_position: TRIM_HORIZON
+# if multiple lambdas are reading from the stream consider to use LATEST
