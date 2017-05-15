@@ -1,4 +1,5 @@
 stack_name: 'StreamToS3-Stack'
+region: 'eu-west-1'
 
 s3_destination_bucket: 'nicor-data-stream'
 s3_deployment_bucket: 'nicor-dev'
