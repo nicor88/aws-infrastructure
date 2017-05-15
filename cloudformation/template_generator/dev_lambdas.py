@@ -93,7 +93,6 @@ hello_world_lambda_alias = template.add_resource(
     )
 )
 
-
 # test to see if a lambda function can be triggered with a custom
 class CustomResource(AWSCustomObject):
     resource_type = "Custom::CustomResourceTest"
@@ -137,14 +136,12 @@ custom_resource_test_lambda_alias = template.add_resource(
     )
 )
 
-
 custom_resource = template.add_resource(
     CustomResource('CustomResource',
                    DependsOn='CustomResourceLambda',
                    ServiceToken=GetAtt(custom_resource_test_lambda, 'Arn')
                    )
 )
-
 
 template.add_output([
     Output('LambdaExecutionRole',
