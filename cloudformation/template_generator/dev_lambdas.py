@@ -1,3 +1,4 @@
+import os
 import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
@@ -6,13 +7,13 @@ from troposphere import awslambda, iam
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 
-# init cloudformation session
-session = boto3.Session(profile_name='nicor88-aws-dev')
-cfn = session.client('cloudformation')
-
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
-DEPLOYMENT_BUCKET = 'nicor-dev'
+
+# setup aws session
+os.environ['AWS_DEFAULT_REGION'] = cfg['region']
+os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
+cfn = boto3.client('cloudformation')
 
 STACK_NAME = cfg['lambda']['stack_name']
 
@@ -64,7 +65,7 @@ hello_world_lambda = template.add_resource(
         Handler='lambda_function.lambda_handler',
         Role=GetAtt('ExecutionRole', 'Arn'),
         Code=awslambda.Code(
-            S3Bucket=DEPLOYMENT_BUCKET,
+            S3Bucket=cfg['s3_deployment_bucket'],
             S3Key='deployments/lambdas/hello_world.zip',
         ),
         Runtime='python3.6',

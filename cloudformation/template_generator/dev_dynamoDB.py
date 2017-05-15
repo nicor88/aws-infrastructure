@@ -1,3 +1,4 @@
+import os
 import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
@@ -5,12 +6,14 @@ import ruamel_yaml as yaml
 from troposphere import dynamodb2
 from troposphere import Template, Tags, Output, Ref, Parameter
 
-# init cloudformation session
-session = boto3.Session(profile_name='nicor88-aws-dev')
-cfn = session.client('cloudformation')
-
 # load config
-cfg = yaml.load(resource_string('cloudformation.config', 'dev_dynamo.yml'))
+cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
+
+# setup aws session
+os.environ['AWS_DEFAULT_REGION'] = cfg['region']
+os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
+cfn = boto3.client('cloudformation')
+
 
 STACK_NAME = cfg['dynamo']['stack_name']
 

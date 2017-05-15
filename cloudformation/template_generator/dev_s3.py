@@ -1,16 +1,18 @@
+import os
 import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
 from troposphere import s3
-from troposphere import Template, Tags, Output, Ref, Parameter
-
-# init cloudformation session
-session = boto3.Session(profile_name='nicor88-aws-dev')
-cfn = session.client('cloudformation')
+from troposphere import Output, Ref, Template
 
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
+
+# setup aws session
+os.environ['AWS_DEFAULT_REGION'] = cfg['region']
+os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
+cfn = boto3.client('cloudformation')
 
 STACK_NAME = cfg['s3']['stack_name']
 
