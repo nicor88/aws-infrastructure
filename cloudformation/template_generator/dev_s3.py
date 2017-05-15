@@ -17,7 +17,7 @@ cfn = boto3.client('cloudformation')
 STACK_NAME = cfg['s3']['stack_name']
 
 template = Template()
-description = 'Dev Lambdas'
+description = 'S3 Bucket mostly used for development reasons'
 template.add_description(description)
 # AWSTemplateFormatVersion
 template.add_version('2010-09-09')
