@@ -75,6 +75,24 @@ hello_world_lambda = template.add_resource(
     )
 )
 
+hello_world_lambda_version = template.add_resource(
+    awslambda.Version(
+        'HelloWorldLambdaVersion',
+        Description='Version of the Lambda',
+        FunctionName=Ref(hello_world_lambda)
+    )
+)
+
+hello_world_lambda_alias = template.add_resource(
+    awslambda.Alias(
+        'HelloWorldLambdaAlias',
+        FunctionName=Ref(hello_world_lambda),
+        FunctionVersion=GetAtt(hello_world_lambda_version, 'Version'),
+        Name='LIVE'
+
+    )
+)
+
 
 # test to see if a lambda function can be triggered with a custom
 class CustomResource(AWSCustomObject):
@@ -98,6 +116,24 @@ custom_resource_test_lambda = template.add_resource(
         Runtime='python3.6',
         Timeout='30',
         MemorySize=128
+    )
+)
+
+custom_resource_test_lambda_version = template.add_resource(
+    awslambda.Version(
+        'CustomResourceLambdaVersion',
+        Description='Version of the Lambda',
+        FunctionName=Ref(custom_resource_test_lambda)
+    )
+)
+
+custom_resource_test_lambda_alias = template.add_resource(
+    awslambda.Alias(
+        'CustomResourceLambdaAlias',
+        FunctionName=Ref(custom_resource_test_lambda),
+        FunctionVersion=GetAtt(custom_resource_test_lambda_version, 'Version'),
+        Name='LIVE'
+
     )
 )
 
