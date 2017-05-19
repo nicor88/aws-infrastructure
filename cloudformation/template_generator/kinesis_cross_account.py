@@ -17,7 +17,7 @@ STACK_NAME = 'KinesisCrossAccountStack'
 KINESIS_STREAM_NAME = 'EventsStreamSimulation'
 KINESIS_SHARD_COUNT = 2
 
-FIREHOSE_DELIVERY_STREAM = 'DeliveryStreamTest'
+FIREHOSE_DELIVERY_STREAM = 'DeliveryEventStream'
 
 LAMBDA_FUNCTION_NAME = 'deliver_to_firehose'
 S3_DEPLOYMENT_BUCKET = 'nicor-dev'
