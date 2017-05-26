@@ -28,7 +28,6 @@ LAMBDA_MEMORY_SIZE = 128
 LAMBDA_TIMEOUT = 30
 KINESIS_SHARD_ITERATOR_TYPE = 'TRIM_HORIZON'
 CROSS_ACCOUNT_ROLE_ARN = 'arn:aws:iam::755248034388:role/firehose-cross-account-access-role'
-# e.g.'arn:aws:iam::755248034388:role/firehose-cross-account-access-role'
 
 
 template = Template()
@@ -72,7 +71,26 @@ lambda_execution_role = template.add_resource(
                                 Action('kinesis', '*'),
                             ],
                             Resource=[GetAtt(kinesis_stream, 'Arn')]
-                        )
+                        ),
+                        Statement(
+                            Sid='AssumeRole',
+                            Effect=Allow,
+                            Action=[
+                                Action('iam', 'PassRole'),
+                                Action('iam', 'GenerateCredentialReport'),
+                                Action('iam', 'Get*'),
+                                Action('iam', 'List*'),
+                            ],
+                            Resource=['*']
+                        ),
+                        Statement(
+                            Sid='PassRole',
+                            Effect=Allow,
+                            Action=[
+                                Action('sts', 'AssumeRole')
+                            ],
+                            Resource=[CROSS_ACCOUNT_ROLE_ARN]
+                        ),
                     ]
                 }
             )
@@ -105,7 +123,9 @@ lambda_stream_to_firehose = template.add_resource(
         Environment=awslambda.Environment('LambdaVars',
                                           Variables=
                                           {'DELIVERY_STREAM': FIREHOSE_DELIVERY_STREAM,
-                                           'CROSS_ACCOUNT_ROLE_ARN': CROSS_ACCOUNT_ROLE_ARN})
+                                           'CROSS_ACCOUNT_ROLE_ARN': CROSS_ACCOUNT_ROLE_ARN
+                                           }
+                                          )
     )
 )
 
