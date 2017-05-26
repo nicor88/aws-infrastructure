@@ -12,7 +12,7 @@ os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
 os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
 cfn = boto3.client('cloudformation')
 
-# TODO configs needs to come froma  file
+# TODO move configs to YML
 STACK_NAME = 'KinesisCrossAccountStack'
 KINESIS_STREAM_NAME = 'EventsStreamSimulation'
 KINESIS_SHARD_COUNT = 2
