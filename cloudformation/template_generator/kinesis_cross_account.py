@@ -23,7 +23,7 @@ LAMBDA_FUNCTION_NAME = 'deliver_to_firehose'
 S3_DEPLOYMENT_BUCKET = 'nicor-dev'
 S3_KEY_LAMBDA = 'deployments/lambdas/deliver_to_firehose.zip'
 LAMBDA_BATCH_SIZE = 1000
-LAMBDA_ENABLED = False
+LAMBDA_ENABLED = True
 LAMBDA_MEMORY_SIZE = 128
 LAMBDA_TIMEOUT = 30
 KINESIS_SHARD_ITERATOR_TYPE = 'TRIM_HORIZON'
@@ -113,7 +113,7 @@ add_kinesis_trigger_for_lambda = template.add_resource(
     awslambda.EventSourceMapping('KinesisLambdaTrigger',
                                  BatchSize=LAMBDA_BATCH_SIZE,
                                  Enabled=LAMBDA_ENABLED,
-                                 FunctionName=LAMBDA_FUNCTION_NAME,
+                                 FunctionName=Ref(lambda_stream_to_firehose),
                                  StartingPosition=KINESIS_SHARD_ITERATOR_TYPE,
                                  EventSourceArn=GetAtt(kinesis_stream, 'Arn')
                                  )

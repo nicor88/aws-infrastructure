@@ -40,7 +40,7 @@ kinesis_stream = template.add_resource(
                    )
 )
 
-firohose_delivery_role = template.add_resource(
+firehose_delivery_role = template.add_resource(
     iam.Role(
         'FirehoseRole',
         AssumeRolePolicyDocument={
@@ -95,7 +95,7 @@ kinesis_delivery_stream = template.add_resource(
                                                                 CompressionFormat='UNCOMPRESSED',
                                                                 Prefix='delivery_stream/',
                                                                 RoleARN=GetAtt(
-                                                                    firohose_delivery_role, 'Arn'),
+                                                                    firehose_delivery_role, 'Arn'),
                                                                 BufferingHints=
                                                                 firehose.BufferingHints(
                                                                     'BufferingSetup',
@@ -184,7 +184,7 @@ add_kinesis_trigger_for_lambda = template.add_resource(
     awslambda.EventSourceMapping('KinesisLambdaTrigger',
                                  BatchSize=cfg['lambda_batch_size'],
                                  Enabled=cfg['lambda_enabled'],
-                                 FunctionName=cfg['lambda_function_name'],
+                                 FunctionName=Ref(lambda_stream_to_firehose),
                                  StartingPosition=cfg['lambda_starting_position'],
                                  EventSourceArn=GetAtt(kinesis_stream, 'Arn')
                                  )
