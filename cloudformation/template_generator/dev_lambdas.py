@@ -4,10 +4,10 @@ from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
 from troposphere import awslambda, iam
-from troposphere.cloudformation import AWSCustomObject
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 
+from troposphere.events import Rule, Target
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
 
@@ -60,7 +60,7 @@ lambda_execution_role = template.add_resource(
 
 hello_world_lambda = template.add_resource(
     awslambda.Function(
-        'HelloWorld',
+        'HelloWorldFunction',
         FunctionName='hello_world',
         Description='Hello world lambdas with Python 3.6',
         Handler='lambda_function.lambda_handler',
@@ -90,6 +90,32 @@ hello_world_lambda_alias = template.add_resource(
         FunctionVersion=GetAtt(hello_world_lambda_version, 'Version'),
         Name='LIVE'
 
+    )
+)
+
+hello_world_event_target = Target(
+    "HelloWorldEventTarget",
+    Arn=GetAtt('HelloWorldFunction', 'Arn'),
+    Id="HelloWorldEventTarget1"
+)
+
+hello_world_scheduler = template.add_resource(
+    Rule(
+        'ScheduledRule',
+        ScheduleExpression='cron(0/5 * * * ? *)', # every 5 minutes
+        # http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
+        Description="Scheduled Event for Lambda",
+        State="ENABLED",
+        Targets=[hello_world_event_target]
+    ))
+
+add_permission = template.add_resource(
+    awslambda.Permission(
+        'AccessLambda',
+        Action='lambda:InvokeFunction',
+        FunctionName='hello_world',
+        Principal='events.amazonaws.com',
+        SourceArn=GetAtt('ScheduledRule', 'Arn')
     )
 )
 
