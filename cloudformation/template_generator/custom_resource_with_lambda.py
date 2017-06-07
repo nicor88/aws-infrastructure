@@ -8,15 +8,12 @@ from troposphere.cloudformation import AWSCustomObject
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 
-# load config
-cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
-
 # setup aws session
-os.environ['AWS_DEFAULT_REGION'] = cfg['region']
+os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
 os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
 cfn = boto3.client('cloudformation')
 
-STACK_NAME = cfg['lambda']['stack_name']
+STACK_NAME = 'CustomResourceLambda'
 
 template = Template()
 description = 'Dev Lambdas'
@@ -58,16 +55,25 @@ lambda_execution_role = template.add_resource(
             ]},
     ))
 
-hello_world_lambda = template.add_resource(
+
+# test to see if a lambda function can be triggered with a custom resource
+class CustomResource(AWSCustomObject):
+    resource_type = "Custom::CustomResourceTest"
+
+    props = {
+        'ServiceToken': (str, True)
+    }
+
+custom_resource_test_lambda = template.add_resource(
     awslambda.Function(
-        'HelloWorld',
-        FunctionName='hello_world',
-        Description='Hello world lambdas with Python 3.6',
+        'CustomResourceLambda',
+        FunctionName='custom_resource',
+        Description='Custom Resource Test lambda with Python 3.6',
         Handler='lambda_function.lambda_handler',
         Role=GetAtt('ExecutionRole', 'Arn'),
         Code=awslambda.Code(
-            S3Bucket=cfg['s3_deployment_bucket'],
-            S3Key='deployments/lambdas/hello_world.zip',
+            S3Bucket='nicor-dev',
+            S3Key='deployments/lambdas/custom_resource.zip',
         ),
         Runtime='python3.6',
         Timeout='30',
@@ -75,28 +81,41 @@ hello_world_lambda = template.add_resource(
     )
 )
 
-hello_world_lambda_version = template.add_resource(
+custom_resource_test_lambda_version = template.add_resource(
     awslambda.Version(
-        'HelloWorldLambdaVersion',
+        'CustomResourceLambdaVersion',
         Description='Version of the Lambda',
-        FunctionName=Ref(hello_world_lambda)
+        FunctionName=Ref(custom_resource_test_lambda)
     )
 )
 
-hello_world_lambda_alias = template.add_resource(
+custom_resource_test_lambda_alias = template.add_resource(
     awslambda.Alias(
-        'HelloWorldLambdaAlias',
-        FunctionName=Ref(hello_world_lambda),
-        FunctionVersion=GetAtt(hello_world_lambda_version, 'Version'),
+        'CustomResourceLambdaAlias',
+        FunctionName=Ref(custom_resource_test_lambda),
+        FunctionVersion=GetAtt(custom_resource_test_lambda_version, 'Version'),
         Name='LIVE'
 
     )
+)
+
+custom_resource = template.add_resource(
+    CustomResource('CustomResource',
+                   DependsOn='CustomResourceLambda',
+                   ServiceToken=GetAtt(custom_resource_test_lambda, 'Arn')
+                   )
 )
 
 template.add_output([
     Output('LambdaExecutionRole',
            Description='Lambdas Execution role',
            Value=Ref(lambda_execution_role))])
+
+template.add_output([
+    Output('CustomResourcePurpose',
+           Description='Custom Purpose setup by the lambda function',
+           Value=GetAtt('CustomResource', 'Purpose')
+           )])
 
 template_json = template.to_json(indent=4)
 print(template_json)
