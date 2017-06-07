@@ -16,7 +16,7 @@ cfn = boto3.client('cloudformation')
 STACK_NAME = 'CustomResourceLambda'
 
 template = Template()
-description = 'Dev Lambdas'
+description = 'Custom Resource with Lambda'
 template.add_description(description)
 # AWSTemplateFormatVersion
 template.add_version('2010-09-09')
