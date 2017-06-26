@@ -7,6 +7,8 @@ from troposphere import awslambda, iam, kinesis, firehose, s3
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 
+import cloudformation.utils as utils
+
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'stream_config.yml'))
 
@@ -212,3 +214,5 @@ cfn.validate_template(TemplateBody=template_json)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
+
+utils.write_template(**stack_args)
