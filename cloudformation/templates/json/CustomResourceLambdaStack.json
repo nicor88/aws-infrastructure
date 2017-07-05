@@ -1,0 +1,100 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Dev Lambdas",
+    "Outputs": {
+        "CustomResourcePurpose": {
+            "Description": "Custom Purpose setup by the lambda function",
+            "Value": {
+                "Fn::GetAtt": [
+                    "CustomResource",
+                    "Purpose"
+                ]
+            }
+        },
+        "LambdaExecutionRole": {
+            "Description": "Lambdas Execution role",
+            "Value": {
+                "Ref": "ExecutionRole"
+            }
+        }
+    },
+    "Resources": {
+        "CustomResource": {
+            "DependsOn": "CustomResourceLambda",
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "CustomResourceLambda",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::CustomResourceTest"
+        },
+        "CustomResourceLambda": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": "nicor-dev",
+                    "S3Key": "deployments/lambdas/travis_build/custom_resource.zip"
+                },
+                "Description": "Custom Resource Test lambda with Python 3.6",
+                "FunctionName": "custom_resource",
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 128,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "ExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": "30"
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "ExecutionRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:logs:*:*:*"
+                                    ],
+                                    "Sid": "Logs"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "GrantLogs"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
