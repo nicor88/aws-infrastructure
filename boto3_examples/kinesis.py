@@ -59,4 +59,4 @@ def read_records_from_kinesis(*, stream_name):
 # put_many_records_to_kinesis(stream_name='test_stream', records_number=5)
 # read_records_from_kinesis(stream_name='test_stream')
 
-# put_many_records_to_kinesis(stream_name=cfg['kinesis_stream_name'], records_number=5)
+# put_many_records_to_kinesis(stream_name='EventsStreamSimulation', records_number=5)

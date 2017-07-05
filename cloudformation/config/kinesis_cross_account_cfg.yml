@@ -1,0 +1,20 @@
+stack_name: KinesisCrossAccountStack
+
+cross_account_role: arn:aws:iam::{}:role/firehose-cross-account-access-role
+
+deliver_to_firehose_lambda:
+  function_name: deliver_to_firehose
+  deployment_bucket: nicor-dev
+  s3_key: deployments/lambdas/travis_build/deliver_to_firehose_cross_account.zip
+  batch_size: 1000
+  kinesis_shard_iterator: TRIM_HORIZON
+  enabled: True
+  memory_size: 128
+  timeout: 30
+  runtime: python3.6
+
+firehose_delivery_stream: DeliveryEventStream
+
+kinesis:
+  stream_name: EventsStream
+  shard_count: 2
