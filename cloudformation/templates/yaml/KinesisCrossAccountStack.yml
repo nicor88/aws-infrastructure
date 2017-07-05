@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack containing kinesis and a lambda writing to another account
+Resources:
+  DevStream:
+    Properties:
+      Name: EventsStreamSimulation
+      ShardCount: 2
+    Type: AWS::Kinesis::Stream
+  ExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+            - arn:aws:logs:*:*:*
+            Sid: Logs
+          - Action:
+            - kinesis:*
+            Effect: Allow
+            Resource:
+            - !GetAtt [DevStream, Arn]
+            Sid: KinesisStream
+          - Action:
+            - iam:PassRole
+            - iam:GenerateCredentialReport
+            - iam:Get*
+            - iam:List*
+            Effect: Allow
+            Resource:
+            - '*'
+            Sid: AssumeRole
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Resource:
+            - arn:aws:iam::755248034388:role/firehose-cross-account-access-role
+            Sid: PassRole
+          Version: '2012-10-17'
+        PolicyName: KinesisToFirehosePolicy
+    Type: AWS::IAM::Role
+  KinesisLambdaTrigger:
+    Properties:
+      BatchSize: 1000
+      Enabled: true
+      EventSourceArn: !GetAtt [DevStream, Arn]
+      FunctionName: !Ref 'KinesisStreamToFirehose'
+      StartingPosition: TRIM_HORIZON
+    Type: AWS::Lambda::EventSourceMapping
+  KinesisStreamToFirehose:
+    Properties:
+      Code:
+        S3Bucket: nicor-dev
+        S3Key: deployments/lambdas/deliver_to_firehose.zip
+      Description: Lambda function to read kinesis stream and put to firehose
+      Environment:
+        Variables:
+          CROSS_ACCOUNT_ROLE_ARN: arn:aws:iam::755248034388:role/firehose-cross-account-access-role
+          DELIVERY_STREAM: DeliveryEventStream
+      FunctionName: deliver_to_firehose
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt [ExecutionRole, Arn]
+      Runtime: python3.6
+      Timeout: 30
+    Type: AWS::Lambda::Function

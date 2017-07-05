@@ -7,6 +7,8 @@ from troposphere import awslambda, iam, kinesis, firehose, s3
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 
+import cloudformation.utils as utils
+
 # setup aws session
 os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
 os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
@@ -157,6 +159,7 @@ stack_args = {
 }
 
 cfn.validate_template(TemplateBody=template_json)
+utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
