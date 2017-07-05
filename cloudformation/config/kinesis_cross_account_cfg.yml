@@ -5,7 +5,7 @@ cross_account_role: arn:aws:iam::{}:role/firehose-cross-account-access-role
 deliver_to_firehose_lambda:
   function_name: deliver_to_firehose
   deployment_bucket: nicor-dev
-  s3_key: deployments/lambdas/deliver_to_firehose.zip
+  s3_key: deployments/lambdas/travis_build/deliver_to_firehose_cross_account.zip
   batch_size: 1000
   kinesis_shard_iterator: TRIM_HORIZON
   enabled: True

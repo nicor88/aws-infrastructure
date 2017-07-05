@@ -35,7 +35,7 @@
             "Properties": {
                 "Code": {
                     "S3Bucket": "nicor-dev",
-                    "S3Key": "deployments/lambdas/deliver_to_firehose.zip"
+                    "S3Key": "deployments/lambdas/travis_build/deliver_to_firehose_cross_account.zip"
                 },
                 "Description": "Lambda function to read kinesis stream and put to firehose",
                 "Environment": {
