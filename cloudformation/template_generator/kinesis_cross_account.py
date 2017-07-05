@@ -3,9 +3,9 @@ import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
-from troposphere import awslambda, iam, kinesis, firehose, s3
-from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
-from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
+from troposphere import awslambda, iam, kinesis
+from troposphere import Template, Output, Ref, GetAtt
+from awacs.aws import Statement, Allow, Action
 
 import cloudformation.utils as utils
 
@@ -14,38 +14,21 @@ os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
 os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
 cfn = boto3.client('cloudformation')
 
-# TODO move configs to YML
-STACK_NAME = 'KinesisCrossAccountStack'
-KINESIS_STREAM_NAME = 'EventsStreamSimulation'
-KINESIS_SHARD_COUNT = 2
 
-FIREHOSE_DELIVERY_STREAM = 'DeliveryEventStream'
-
-LAMBDA_FUNCTION_NAME = 'deliver_to_firehose'
-S3_DEPLOYMENT_BUCKET = 'nicor-dev'
-S3_KEY_LAMBDA = 'deployments/lambdas/deliver_to_firehose.zip'
-LAMBDA_BATCH_SIZE = 1000
-LAMBDA_ENABLED = True
-LAMBDA_MEMORY_SIZE = 128
-LAMBDA_TIMEOUT = 30
-KINESIS_SHARD_ITERATOR_TYPE = 'TRIM_HORIZON'
-CROSS_ACCOUNT_ROLE_ARN = 'arn:aws:iam::755248034388:role/firehose-cross-account-access-role'
-
+cfg = yaml.load(resource_string('cloudformation.config', 'kinesis_cross_account_cfg.yml'))
 
 template = Template()
 description = 'Stack containing kinesis and a lambda writing to another account'
 template.add_description(description)
-# AWSTemplateFormatVersion
 template.add_version('2010-09-09')
 
 kinesis_stream = template.add_resource(
     kinesis.Stream('DevStream',
-                   Name=KINESIS_STREAM_NAME,
-                   ShardCount=KINESIS_SHARD_COUNT
+                   Name=cfg['kinesis']['stream_name'],
+                   ShardCount=cfg['kinesis']['shard_count']
                    )
 )
 
-# lambda section
 lambda_execution_role = template.add_resource(
     iam.Role(
         'ExecutionRole',
@@ -91,7 +74,7 @@ lambda_execution_role = template.add_resource(
                             Action=[
                                 Action('sts', 'AssumeRole')
                             ],
-                            Resource=[CROSS_ACCOUNT_ROLE_ARN]
+                            Resource=[cfg['cross_account_role'].format(os.environ['CROSS_ACCOUNT'])]
                         ),
                     ]
                 }
@@ -107,45 +90,67 @@ lambda_execution_role = template.add_resource(
             ]},
     ))
 
-
-lambda_stream_to_firehose = template.add_resource(
+deliver_to_firehose_lambda = template.add_resource(
     awslambda.Function(
-        'KinesisStreamToFirehose',
-        FunctionName=LAMBDA_FUNCTION_NAME,
+        'DeliverToFirehoseLambda',
+        FunctionName=cfg['deliver_to_firehose_lambda']['function_name'],
         Description='Lambda function to read kinesis stream and put to firehose',
         Handler='lambda_function.lambda_handler',
         Role=GetAtt('ExecutionRole', 'Arn'),
         Code=awslambda.Code(
-            S3Bucket=S3_DEPLOYMENT_BUCKET,
-            S3Key=S3_KEY_LAMBDA,
+            S3Bucket=cfg['deliver_to_firehose_lambda']['deployment_bucket'],
+            S3Key=cfg['deliver_to_firehose_lambda']['s3_key'],
         ),
-        Runtime='python3.6',
-        Timeout=LAMBDA_TIMEOUT,
-        MemorySize=LAMBDA_MEMORY_SIZE,
+        Runtime=cfg['deliver_to_firehose_lambda']['runtime'],
+        Timeout=cfg['deliver_to_firehose_lambda']['timeout'],
+        MemorySize=cfg['deliver_to_firehose_lambda']['memory_size'],
         Environment=awslambda.Environment('LambdaVars',
                                           Variables=
-                                          {'DELIVERY_STREAM': FIREHOSE_DELIVERY_STREAM,
-                                           'CROSS_ACCOUNT_ROLE_ARN': CROSS_ACCOUNT_ROLE_ARN
+                                          {'DELIVERY_STREAM': cfg['firehose_delivery_stream'],
+                                           'CROSS_ACCOUNT_ROLE_ARN': cfg['cross_account_role']
+                                          .format(os.environ['CROSS_ACCOUNT'])
                                            }
                                           )
     )
 )
 
-add_kinesis_trigger_for_lambda = template.add_resource(
+kinesis_trigger_lambda = template.add_resource(
     awslambda.EventSourceMapping('KinesisLambdaTrigger',
-                                 BatchSize=LAMBDA_BATCH_SIZE,
-                                 Enabled=LAMBDA_ENABLED,
-                                 FunctionName=Ref(lambda_stream_to_firehose),
-                                 StartingPosition=KINESIS_SHARD_ITERATOR_TYPE,
+                                 BatchSize=cfg['deliver_to_firehose_lambda']['batch_size'],
+                                 Enabled=cfg['deliver_to_firehose_lambda']['enabled'],
+                                 FunctionName=Ref(deliver_to_firehose_lambda),
+                                 StartingPosition=cfg['deliver_to_firehose_lambda']['kinesis_shard_iterator'],
                                  EventSourceArn=GetAtt(kinesis_stream, 'Arn')
                                  )
 )
+
+template.add_output([
+    Output('KinesisStream',
+           Description='Kinesis stream',
+           Value=Ref(kinesis_stream))])
+
+template.add_output([
+    Output('KinesisStreamArn',
+           Description='Kinesis stream Arn',
+           Value=GetAtt(kinesis_stream, 'Arn'))])
+
+template.add_output([
+    Output('LambdaExecutionRole',
+           Description='Execution role of the lambda function',
+           Value=Ref(lambda_execution_role))])
+
+template.add_output([
+    Output('DeliverToFirehoseLambda',
+           Description='Lambda to put kinesis records to a firehose'
+                       ' that belongs to another account',
+           Value=Ref(deliver_to_firehose_lambda))])
+
 
 template_json = template.to_json(indent=4)
 print(template_json)
 
 stack_args = {
-    'StackName': STACK_NAME,
+    'StackName': cfg['stack_name'],
     'TemplateBody': template_json,
     'Capabilities': [
         'CAPABILITY_IAM',
