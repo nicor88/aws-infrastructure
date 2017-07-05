@@ -35,7 +35,7 @@
             "Properties": {
                 "Code": {
                     "S3Bucket": "nicor-dev",
-                    "S3Key": "deployments/lambdas/custom_resource.zip"
+                    "S3Key": "deployments/lambdas/travis_build/custom_resource.zip"
                 },
                 "Description": "Custom Resource Test lambda with Python 3.6",
                 "FunctionName": "custom_resource",
@@ -51,30 +51,6 @@
                 "Timeout": "30"
             },
             "Type": "AWS::Lambda::Function"
-        },
-        "CustomResourceLambdaAlias": {
-            "Properties": {
-                "FunctionName": {
-                    "Ref": "CustomResourceLambda"
-                },
-                "FunctionVersion": {
-                    "Fn::GetAtt": [
-                        "CustomResourceLambdaVersion",
-                        "Version"
-                    ]
-                },
-                "Name": "LIVE"
-            },
-            "Type": "AWS::Lambda::Alias"
-        },
-        "CustomResourceLambdaVersion": {
-            "Properties": {
-                "Description": "Version of the Lambda",
-                "FunctionName": {
-                    "Ref": "CustomResourceLambda"
-                }
-            },
-            "Type": "AWS::Lambda::Version"
         },
         "ExecutionRole": {
             "Properties": {
@@ -119,51 +95,6 @@
                 ]
             },
             "Type": "AWS::IAM::Role"
-        },
-        "HelloWorld": {
-            "Properties": {
-                "Code": {
-                    "S3Bucket": "nicor-dev",
-                    "S3Key": "deployments/lambdas/hello_world.zip"
-                },
-                "Description": "Hello world lambdas with Python 3.6",
-                "FunctionName": "hello_world",
-                "Handler": "lambda_function.lambda_handler",
-                "MemorySize": 128,
-                "Role": {
-                    "Fn::GetAtt": [
-                        "ExecutionRole",
-                        "Arn"
-                    ]
-                },
-                "Runtime": "python3.6",
-                "Timeout": "30"
-            },
-            "Type": "AWS::Lambda::Function"
-        },
-        "HelloWorldLambdaAlias": {
-            "Properties": {
-                "FunctionName": {
-                    "Ref": "HelloWorld"
-                },
-                "FunctionVersion": {
-                    "Fn::GetAtt": [
-                        "HelloWorldLambdaVersion",
-                        "Version"
-                    ]
-                },
-                "Name": "LIVE"
-            },
-            "Type": "AWS::Lambda::Alias"
-        },
-        "HelloWorldLambdaVersion": {
-            "Properties": {
-                "Description": "Version of the Lambda",
-                "FunctionName": {
-                    "Ref": "HelloWorld"
-                }
-            },
-            "Type": "AWS::Lambda::Version"
         }
     }
 }

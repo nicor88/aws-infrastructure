@@ -7,9 +7,6 @@ ec2:
 dynamo:
   stack_name: 'Dynamo-Dev'
 
-lambda:
-  stack_name: 'Lambda-Dev'
-
 network:
   vpc_id: 'vpc-8b708fec'
 
