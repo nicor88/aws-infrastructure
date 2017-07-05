@@ -1,30 +1,25 @@
 import os
 import boto3
-from pkg_resources import resource_string
-import ruamel_yaml as yaml
 
 from troposphere import awslambda, iam
-from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
-from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
-
+from awacs.aws import Statement, Allow, Action
+from troposphere import Template, Output, Ref, GetAtt
 from troposphere.events import Rule, Target
-# load config
-cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
+
+import cloudformation.utils as utils
 
 # setup aws session
-os.environ['AWS_DEFAULT_REGION'] = cfg['region']
+os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
 os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
 cfn = boto3.client('cloudformation')
 
-STACK_NAME = cfg['lambda']['stack_name']
+STACK_NAME = 'HelloWorldLambdaStack'
 
 template = Template()
-description = 'Dev Lambdas'
+description = 'All needed resources to have a lambda function'
 template.add_description(description)
-# AWSTemplateFormatVersion
 template.add_version('2010-09-09')
 
-# execution role for lambdas
 lambda_execution_role = template.add_resource(
     iam.Role(
         'ExecutionRole',
@@ -61,13 +56,13 @@ lambda_execution_role = template.add_resource(
 hello_world_lambda = template.add_resource(
     awslambda.Function(
         'HelloWorldFunction',
-        FunctionName='hello_world',
+        FunctionName='HelloWorld',
         Description='Hello world lambdas with Python 3.6',
         Handler='lambda_function.lambda_handler',
         Role=GetAtt('ExecutionRole', 'Arn'),
         Code=awslambda.Code(
-            S3Bucket=cfg['s3_deployment_bucket'],
-            S3Key='deployments/lambdas/hello_world.zip',
+            S3Bucket='nicor-dev',
+            S3Key='deployments/lambdas/travis_build/hello_world.zip',
         ),
         Runtime='python3.6',
         Timeout='30',
@@ -75,28 +70,10 @@ hello_world_lambda = template.add_resource(
     )
 )
 
-hello_world_lambda_version = template.add_resource(
-    awslambda.Version(
-        'HelloWorldLambdaVersion',
-        Description='Version of the Lambda',
-        FunctionName=Ref(hello_world_lambda)
-    )
-)
-
-hello_world_lambda_alias = template.add_resource(
-    awslambda.Alias(
-        'HelloWorldLambdaAlias',
-        FunctionName=Ref(hello_world_lambda),
-        FunctionVersion=GetAtt(hello_world_lambda_version, 'Version'),
-        Name='LIVE'
-
-    )
-)
-
 hello_world_event_target = Target(
     "HelloWorldEventTarget",
-    Arn=GetAtt('HelloWorldFunction', 'Arn'),
-    Id="HelloWorldEventTarget1"
+    Arn=GetAtt(hello_world_lambda, 'Arn'),
+    Id="HelloWorldFunctionEventTarget"
 )
 
 hello_world_scheduler = template.add_resource(
@@ -119,6 +96,9 @@ add_permission = template.add_resource(
     )
 )
 
+
+
+
 template.add_output([
     Output('LambdaExecutionRole',
            Description='Lambdas Execution role',
@@ -136,13 +116,14 @@ stack_args = {
     'Tags': [
         {
             'Key': 'Purpose',
-            'Value': 'DevLambdas'
+            'Value': 'HelloWorldLambda'
         }
     ]
 }
 
 cfn.validate_template(TemplateBody=template_json)
 
+utils.write_template(**stack_args)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)

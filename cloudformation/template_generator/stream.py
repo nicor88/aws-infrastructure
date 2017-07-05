@@ -7,6 +7,8 @@ from troposphere import awslambda, iam, kinesis, firehose, s3
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 
+import cloudformation.utils as utils
+
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'stream_config.yml'))
 
@@ -40,7 +42,7 @@ kinesis_stream = template.add_resource(
                    )
 )
 
-firohose_delivery_role = template.add_resource(
+firehose_delivery_role = template.add_resource(
     iam.Role(
         'FirehoseRole',
         AssumeRolePolicyDocument={
@@ -95,7 +97,7 @@ kinesis_delivery_stream = template.add_resource(
                                                                 CompressionFormat='UNCOMPRESSED',
                                                                 Prefix='delivery_stream/',
                                                                 RoleARN=GetAtt(
-                                                                    firohose_delivery_role, 'Arn'),
+                                                                    firehose_delivery_role, 'Arn'),
                                                                 BufferingHints=
                                                                 firehose.BufferingHints(
                                                                     'BufferingSetup',
@@ -184,7 +186,7 @@ add_kinesis_trigger_for_lambda = template.add_resource(
     awslambda.EventSourceMapping('KinesisLambdaTrigger',
                                  BatchSize=cfg['lambda_batch_size'],
                                  Enabled=cfg['lambda_enabled'],
-                                 FunctionName=cfg['lambda_function_name'],
+                                 FunctionName=Ref(lambda_stream_to_firehose),
                                  StartingPosition=cfg['lambda_starting_position'],
                                  EventSourceArn=GetAtt(kinesis_stream, 'Arn')
                                  )
@@ -212,3 +214,5 @@ cfn.validate_template(TemplateBody=template_json)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
+
+utils.write_template(**stack_args)

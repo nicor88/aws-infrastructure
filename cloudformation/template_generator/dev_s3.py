@@ -6,6 +6,8 @@ import ruamel_yaml as yaml
 from troposphere import s3
 from troposphere import Output, Ref, Template
 
+import cloudformation.utils as utils
+
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
 
@@ -67,3 +69,5 @@ cfn.validate_template(TemplateBody=template_json)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
+
+utils.write_template(**stack_args)
