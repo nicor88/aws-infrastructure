@@ -1,0 +1,34 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "S3 Developments Buckets",
+    "Outputs": {
+        "S3DataBucket": {
+            "Description": "S3 bucket to put data",
+            "Value": {
+                "Ref": "S3DataBucket"
+            }
+        },
+        "S3DevBucket": {
+            "Description": "S3 bucket for development",
+            "Value": {
+                "Ref": "S3DevBucket"
+            }
+        }
+    },
+    "Resources": {
+        "S3DataBucket": {
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "BucketName": "nicor-data"
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "S3DevBucket": {
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "BucketName": "nicor-dev"
+            },
+            "Type": "AWS::S3::Bucket"
+        }
+    }
+}
