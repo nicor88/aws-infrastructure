@@ -62,6 +62,7 @@ class CustomResource(AWSCustomObject):
         'ServiceToken': (str, True)
     }
 
+
 custom_resource_test_lambda = template.add_resource(
     awslambda.Function(
         'CustomResourceLambda',
