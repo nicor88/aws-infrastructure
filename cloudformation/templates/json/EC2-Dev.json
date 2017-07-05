@@ -1,0 +1,58 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Dev Server Stack Free Tier",
+    "Resources": {
+        "DevServer": {
+            "Properties": {
+                "ImageId": "ami-a8d2d7ce",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "InstanceType": "t2.micro",
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "SSH"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "dev-server"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "SSH": {
+            "Properties": {
+                "GroupDescription": "Allow SSH traffic",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "all-ssh"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": "vpc-8b708fec"
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        }
+    }
+}

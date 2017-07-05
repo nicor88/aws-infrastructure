@@ -8,6 +8,8 @@ from troposphere.cloudformation import AWSCustomObject
 from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 from troposphere import Template, Tags, Output, Ref, Parameter, GetAtt
 
+import cloudformation.utils as utils
+
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
 
@@ -173,6 +175,7 @@ stack_args = {
 
 cfn.validate_template(TemplateBody=template_json)
 
+utils.write_template(**stack_args)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)

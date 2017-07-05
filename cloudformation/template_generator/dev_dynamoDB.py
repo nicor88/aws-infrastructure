@@ -3,6 +3,8 @@ import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
+import cloudformation.utils as utils
+
 from troposphere import dynamodb2
 from troposphere import Template, Tags, Output, Ref, Parameter
 
@@ -42,3 +44,6 @@ cfn.validate_template(TemplateBody=template_json)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
+
+
+utils.write_template(**stack_args)
