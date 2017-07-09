@@ -1,22 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Dev Server Stack Free Tier
-Resources:
+Description: Dev Server Stack
+Outputs:
+  AllSSHsg:
+    Description: Security group to enable SSH from everywhere
+    Value: !Ref 'AllSSH'
   DevServer:
+    Description: EC2 Instance
+    Value: !Ref 'DevServer'
+  DevSubnet:
+    Description: Public Subnet used for Dev Servers
+    Value: !Ref 'DevPublicSubnet'
+Resources:
+  AllSSH:
     Properties:
-      ImageId: ami-a8d2d7ce
-      InstanceInitiatedShutdownBehavior: stop
-      InstanceType: t2.micro
-      SecurityGroupIds:
-      - !Ref 'SSH'
-      Tags:
-      - Key: Name
-        Value: dev-server
-      - Key: StackName
-        Value: !Ref 'AWS::StackName'
-    Type: AWS::EC2::Instance
-  SSH:
-    Properties:
-      GroupDescription: Allow SSH traffic
+      GroupDescription: Allow SSH traffic from Everywhere
       SecurityGroupIngress:
       - CidrIp: 0.0.0.0/0
         FromPort: '22'
@@ -29,3 +26,124 @@ Resources:
         Value: !Ref 'AWS::StackName'
       VpcId: vpc-8b708fec
     Type: AWS::EC2::SecurityGroup
+  DevPublicSubnet:
+    Properties:
+      AvailabilityZone: eu-west-1a
+      CidrBlock: 172.31.1.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+      - Key: AZ
+        Value: eu-west-1
+      - Key: Name
+        Value: dev-public-subnet
+      - Key: StackName
+        Value: !Ref 'AWS::StackName'
+      VpcId: vpc-8b708fec
+    Type: AWS::EC2::Subnet
+  DevPublicSubnetRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-1197ed76
+      SubnetId: !Ref 'DevPublicSubnet'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  DevServer:
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            conda_permission_for_ec2-user:
+              command: chown ec2-user:ec2-user /home/ec2-user/miniconda.sh
+            download_miniconda:
+              command: wget http://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh
+                -O /home/ec2-user/miniconda.sh
+            install_miniconda:
+              command: su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"
+            update_yum_packages:
+              command: yum update -y
+          files:
+            /etc/cfn/cfn-hup.conf:
+              content: !Join ['', ['[main]
+
+                    ', stack=, !Ref 'AWS::StackId', '
+
+                    ', region=, !Ref 'AWS::Region', '
+
+                    ', interval=2, '
+
+                    ']]
+              group: root
+              mode: '000400'
+              owner: root
+            /etc/cfn/hooks.d/cfn-auto-reloader.conf:
+              content: !Join ['', ['[cfn-auto-reloader-hook]
+
+                    ', 'triggers=post.update
+
+                    ', 'path=Resources.DevServer.Metadata.AWS::CloudFormation::Init
+
+                    ', action=/opt/aws/bin/cfn-init -v, ' --stack ', !Ref 'AWS::StackId',
+                  ' --resource DevServer', ' --region ', !Ref 'AWS::Region', '
+
+                    runas=root
+
+                    ']]
+            /home/ec2-user/.bashrc:
+              content: !Join ['', ['export PATH="/home/ec2-user/miniconda/bin:$PATH"
+
+                    ']]
+              group: ec2-user
+              mode: '000400'
+              owner: ec2-user
+          services:
+            sysvinit:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                - /etc/cfn/cfn-hup.conf
+                - /etc/cfn/hooks.d/cfn-auto-reloader.conf
+    Properties:
+      ImageId: ami-e5083683
+      InstanceInitiatedShutdownBehavior: stop
+      InstanceType: t2.micro
+      KeyName: nicor88-dev
+      Monitoring: 'true'
+      SecurityGroupIds:
+      - !Ref 'AllSSH'
+      SubnetId: !Ref 'DevPublicSubnet'
+      Tags:
+      - Key: Name
+        Value: dev-server
+      - Key: StackName
+        Value: !Ref 'AWS::StackName'
+      UserData: !Base64
+        Fn::Join:
+        - ''
+        - - '#!/bin/bash -xe
+
+            '
+          - '/opt/aws/bin/cfn-init -v '
+          - ' --stack '
+          - !Ref 'AWS::StackName'
+          - ' --resource DevServer'
+          - ' --region '
+          - !Ref 'AWS::Region'
+          - '
+
+            '
+          - 'yum install -y aws-cfn-bootstrap
+
+            '
+          - /opt/aws/bin/cfn-hup || error_exit "Failed to start cfn-hup"
+          - '
+
+            '
+          - '/opt/aws/bin/cfn-signal -e $? '
+          - ' --stack '
+          - !Ref 'AWS::StackName'
+          - ' --resource DevServer'
+          - ' --region '
+          - !Ref 'AWS::Region'
+          - '
+
+            '
+    Type: AWS::EC2::Instance
