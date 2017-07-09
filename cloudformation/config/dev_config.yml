@@ -9,6 +9,7 @@ dynamo:
 
 network:
   vpc_id: 'vpc-8b708fec'
+  public_route_table: 'rtb-1197ed76'
 
 s3:
   stack_name: 'S3-Dev'
