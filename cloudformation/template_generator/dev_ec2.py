@@ -83,13 +83,13 @@ instance_metadata = Metadata(
                 'command': 'yum update -y'
             },
             'download_miniconda': {
-                'command': 'wget http://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh',
-            },
-            'conda_permission_for_ec2-user': {
-                'command': 'chown ec2-user:ec2-user /home/ec2-user/miniconda.sh',
+                'command': 'su - ec2-user -c "wget http://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh"',
             },
             'install_miniconda': {
                  'command': 'su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"',
+            },
+            'remove_installer': {
+                 'command': 'rm -rf /home/ec2-user/miniconda.sh',
             }
         },
         files=InitFiles({
@@ -145,47 +145,63 @@ instance_metadata = Metadata(
     })
 )
 
+# volume
+# volume = template.add_resource(
+#     ec2.Volume('DevVolume',
+#                AvailabilityZone='eu-west-1a',
+#                Size='20',
+#                VolumeType='gp2',
+#                Tags=Tags(
+#                    StackName=Ref('AWS::StackName'),
+#                    Name='dev-server-volume',
+#                )
+#                )
+# )
+
 # ec2 instance
 ec2_instance = template.add_resource(ec2.Instance(
     'DevServer',
     InstanceType='t2.micro',
-    ImageId='ami-e5083683',
+    ImageId='ami-d7b9a2b1',  # 2017.03 ami-d7b9a2b1  # after resizing ami-594bab20
     SubnetId=Ref(dev_public_subnet),
     SecurityGroupIds=[Ref(all_ssh)],
     InstanceInitiatedShutdownBehavior='stop',
     Monitoring=True,
     KeyName='nicor88-dev',
     Metadata=instance_metadata,
+    # Volumes=[
+    #     ec2.MountPoint(VolumeId=Ref(volume), Device='/dev/sdb')
+    # ],
     UserData=Base64(
-            Join(
-                '',
-                ['#!/bin/bash -xe\n',
+        Join(
+            '',
+            ['#!/bin/bash -xe\n',
 
-                 # cfn-init: install what is specified in the metadata section
-                 '/opt/aws/bin/cfn-init -v ',
-                 ' --stack ', Ref('AWS::StackName'),
-                 ' --resource DevServer',
-                 ' --region ', Ref('AWS::Region'), '\n',
+             # cfn-init: install what is specified in the metadata section
+             '/opt/aws/bin/cfn-init -v ',
+             ' --stack ', Ref('AWS::StackName'),
+             ' --resource DevServer',
+             ' --region ', Ref('AWS::Region'), '\n',
 
-                 # cfn-hup
-                 # Start up the cfn-hup daemon to listen for changes to the server metadata
-                 'yum install -y aws-cfn-bootstrap\n',
-                 '/opt/aws/bin/cfn-hup || error_exit "Failed to start cfn-hup"',
-                 '\n',
+             # cfn-hup
+             # Start up the cfn-hup daemon to listen for changes to the server metadata
+             'yum install -y aws-cfn-bootstrap\n',
+             '/opt/aws/bin/cfn-hup || error_exit "Failed to start cfn-hup"',
+             '\n',
 
-                 # cfn-signal
-                 '/opt/aws/bin/cfn-signal -e $? ',
-                 ' --stack ', Ref('AWS::StackName'),
-                 ' --resource DevServer',
-                 ' --region ', Ref('AWS::Region'),
-                 '\n'
-                 ])
-        ),
+             # cfn-signal
+             '/opt/aws/bin/cfn-signal -e $? ',
+             ' --stack ', Ref('AWS::StackName'),
+             ' --resource DevServer',
+             ' --region ', Ref('AWS::Region'),
+             '\n'
+             ])
+    ),
     Tags=Tags(
         StackName=Ref('AWS::StackName'),
         Name='dev-server',
-        )
     )
+)
 )
 
 # outputs

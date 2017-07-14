@@ -88,14 +88,14 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "commands": {
-                            "conda_permission_for_ec2-user": {
-                                "command": "chown ec2-user:ec2-user /home/ec2-user/miniconda.sh"
-                            },
                             "download_miniconda": {
-                                "command": "wget http://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh"
+                                "command": "su - ec2-user -c \"wget http://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh\""
                             },
                             "install_miniconda": {
                                 "command": "su - ec2-user -c \"bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda\""
+                            },
+                            "remove_installer": {
+                                "command": "rm -rf /home/ec2-user/miniconda.sh"
                             },
                             "update_yum_packages": {
                                 "command": "yum update -y"
@@ -180,7 +180,7 @@
                 }
             },
             "Properties": {
-                "ImageId": "ami-e5083683",
+                "ImageId": "ami-d7b9a2b1",
                 "InstanceInitiatedShutdownBehavior": "stop",
                 "InstanceType": "t2.micro",
                 "KeyName": "nicor88-dev",
