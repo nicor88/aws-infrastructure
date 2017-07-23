@@ -12,13 +12,13 @@ from troposphere.autoscaling import Metadata
 import cloudformation.utils as utils
 
 # load config
-cfg = yaml.load(resource_string('cloudformation.config', 'dev_config.yml'))
+cfg = yaml.load(resource_string('cloudformation.config', 'boilerplate_ec2_config.yml'))
 
 # setup aws session
+
+# TODO to remove
 os.environ['AWS_DEFAULT_REGION'] = cfg['region']
 os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
-cfn = boto3.client('cloudformation')
-
 
 STACK_NAME = cfg['ec2']['stack_name']
 
@@ -232,7 +232,8 @@ stack_args = {
     ]
 }
 
-cfn.validate_template(TemplateBody=template_json)
+cfn = boto3.client('cloudformation')
+# cfn.validate_template(TemplateBody=template_json)
 utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)
