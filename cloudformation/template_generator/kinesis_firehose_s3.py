@@ -10,7 +10,7 @@ from awacs.aws import Statement, Allow, Deny, Policy, Action, Condition
 import cloudformation.utils as utils
 
 # load config
-cfg = yaml.load(resource_string('cloudformation.config', 'stream_config.yml'))
+cfg = yaml.load(resource_string('cloudformation.config', 'kinesis_firehose_s3.yml'))
 
 # setup aws session
 os.environ['AWS_DEFAULT_REGION'] = cfg['region']
