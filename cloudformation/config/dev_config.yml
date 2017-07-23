@@ -1,14 +1,7 @@
 region: 'eu-west-1'
-ec2:
-  stack_name: 'EC2-Dev'
-  instance_type: 't2.micro'
-  ami_version: 'ami-a8d2d7ce' # AMI found using https://cloud-images.ubuntu.com/locator/ec2/
 
 dynamo:
   stack_name: 'Dynamo-Dev'
-
-network:
-  vpc_id: 'vpc-8b708fec'
 
 s3:
   stack_name: 'S3-Dev'
