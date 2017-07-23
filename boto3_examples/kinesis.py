@@ -13,7 +13,6 @@ os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
 
 # configure client using bot3
 kinesis = boto3.client('kinesis')
-cfg = yaml.load(resource_string('cloudformation.config', 'kinesis_firehose_s3.yml'))
 
 
 # put a single record to the stream
@@ -55,8 +54,7 @@ def read_records_from_kinesis(*, stream_name):
 
     return records_from_the_stream
 
+# Examples
 # put_one_record_to_kinesis(stream_name='test_stream')
 # put_many_records_to_kinesis(stream_name='test_stream', records_number=5)
 # read_records_from_kinesis(stream_name='test_stream')
-
-# put_many_records_to_kinesis(stream_name='EventsStreamSimulation', records_number=5)
