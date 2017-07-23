@@ -13,7 +13,7 @@ os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
 
 # configure client using bot3
 kinesis = boto3.client('kinesis')
-cfg = yaml.load(resource_string('cloudformation.config', 'stream_config.yml'))
+cfg = yaml.load(resource_string('cloudformation.config', 'kinesis_firehose_s3.yml'))
 
 
 # put a single record to the stream
