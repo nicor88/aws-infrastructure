@@ -1,4 +1,3 @@
-import os
 import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
@@ -11,11 +10,6 @@ import cloudformation.utils as utils
 
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'kinesis_firehose_s3.yml'))
-
-# setup aws session
-os.environ['AWS_DEFAULT_REGION'] = cfg['region']
-os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
-cfn = boto3.client('cloudformation')
 
 STACK_NAME = cfg['stack_name']
 
@@ -209,10 +203,10 @@ stack_args = {
     ]
 }
 
+cfn = boto3.client('cloudformation')
 cfn.validate_template(TemplateBody=template_json)
+utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
-
-utils.write_template(**stack_args)
