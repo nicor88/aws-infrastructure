@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nicor88/aws-dev.svg?branch=master)](https://travis-ci.org/nicor88/aws-dev)
+
 # aws-dev
 Collection of examples in AWS
 
