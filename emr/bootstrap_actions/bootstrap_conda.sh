@@ -9,4 +9,4 @@ conda config -f --add channels conda-forge
 conda config -f --add channels defaults
 
 # install libs
-conda install hdfs3 findspark ujson jsonschema toolz boto3 py4j numpy pandas==0.19.2
+conda install hdfs3 findspark ujson jsonschema toolz boto3 py4j numpy pandas
