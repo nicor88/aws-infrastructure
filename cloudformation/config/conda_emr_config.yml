@@ -1,1 +1,6 @@
+region: 'eu-west-1'
 stack_name: CondaEMRStack
+
+network:
+  vpc_id: 'vpc-8b708fec'
+  public_route_table: 'rtb-1197ed76'

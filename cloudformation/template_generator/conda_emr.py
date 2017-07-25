@@ -2,7 +2,8 @@ import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
-from troposphere import Template
+from troposphere import ec2
+from troposphere import Ref, Tags, Template
 
 import cloudformation.utils as utils
 
@@ -11,11 +12,33 @@ cfg = yaml.load(resource_string('cloudformation.config', 'conda_emr_config.yml')
 
 STACK_NAME = cfg['stack_name']
 
-
 template = Template()
 description = 'Stack containing EMR with conda in all nodes'
 template.add_description(description)
 template.add_version('2010-09-09')
+
+conda_emr_subnet = template.add_resource(
+    ec2.Subnet(
+        'CondaEMRSubet',
+        AvailabilityZone='eu-west-1a',
+        CidrBlock='172.31.2.0/24',
+        VpcId=cfg['network']['vpc_id'],
+        MapPublicIpOnLaunch=True,
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            AZ=cfg['region'],
+            Name='conda-emr-subnet'
+        )
+    )
+)
+
+template.add_resource(
+    ec2.SubnetRouteTableAssociation('DevPublicSubnetRouteTableAssociation',
+                                    RouteTableId=cfg['network']['public_route_table'],
+                                    SubnetId=Ref(conda_emr_subnet)
+                                    )
+)
+
 
 template_json = template.to_json(indent=4)
 print(template_json)
