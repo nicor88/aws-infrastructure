@@ -17,9 +17,9 @@ os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
 # if you are using a lambda function to put data into a kinesis stream be sure that the timeout
 # of boto3 client is < that the timeout of the lambda function
 kinesis = boto3.client('kinesis', config=Config(connect_timeout=1000))
+# https://github.com/boto/botocore/pull/891
 
 # put a single record to the stream
-
 def put_one_record_to_kinesis(*, stream_name):
     res = kinesis.put_record(StreamName=stream_name,
                              Data=json.dumps(
