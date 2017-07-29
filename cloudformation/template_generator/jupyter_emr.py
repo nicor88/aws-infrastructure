@@ -15,7 +15,7 @@ cfg = yaml.load(resource_string('cloudformation.config', 'jupyter_emr_config.yml
 STACK_NAME = cfg['stack_name']
 
 template = Template()
-description = 'Stack containing EMR with conda in all nodes'
+description = 'Stack containing EMR with Jupyter on Master Node'
 template.add_description(description)
 template.add_version('2010-09-09')
 

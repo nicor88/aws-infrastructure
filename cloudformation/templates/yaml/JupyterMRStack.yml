@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Stack containing EMR with conda in all nodes
+Description: Stack containing EMR with Jupyter on Master Node
 Outputs:
   EMRCluster:
     Description: EMRCluster
