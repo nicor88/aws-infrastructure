@@ -52,12 +52,12 @@ Resources:
       - PolicyDocument:
           Statement:
           - Action:
-            - cloudformation:DeleteStack
+            - cloudformation:*
             Effect: Allow
             Resource:
             - arn:aws:cloudformation:eu-west-1:*:stack/GenericEMRStack/*
           Version: '2012-10-17'
-        PolicyName: CfnDeleteStack
+        PolicyName: CfnAccess
       - PolicyDocument:
           Statement:
           - Action:

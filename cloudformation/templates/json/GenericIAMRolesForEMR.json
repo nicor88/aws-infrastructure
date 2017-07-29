@@ -99,7 +99,7 @@
                             "Statement": [
                                 {
                                     "Action": [
-                                        "cloudformation:DeleteStack"
+                                        "cloudformation:*"
                                     ],
                                     "Effect": "Allow",
                                     "Resource": [
@@ -109,7 +109,7 @@
                             ],
                             "Version": "2012-10-17"
                         },
-                        "PolicyName": "CfnDeleteStack"
+                        "PolicyName": "CfnAccess"
                     },
                     {
                         "PolicyDocument": {

@@ -85,14 +85,14 @@ emr_job_flow_role = template.add_resource(
                     ]
                 }),
             iam.Policy(
-                PolicyName='CfnDeleteStack',
+                PolicyName='CfnAccess',
                 PolicyDocument={
                     "Version": "2012-10-17",
                     "Statement": [
                         Statement(
                             Effect=Allow,
                             Action=[
-                                Action('cloudformation', 'DeleteStack')
+                                Action('cloudformation', '*')
                             ],
                             Resource=[
                                 'arn:aws:cloudformation:eu-west-1:*:stack/GenericEMRStack/*'
