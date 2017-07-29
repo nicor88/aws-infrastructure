@@ -8,9 +8,8 @@ wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /h
 echo $USER
 echo $HOME
 
-
 # setup conda
-echo -e "\nexport PATH=/home/hadoop/conda/bin:$PATH" >> /home/hadoop/.bashrc
+echo -e "\nexport PATH=/home/hadoop/miniconda/bin:$PATH" >> /home/hadoop/.bashrc
 source /home/hadoop/.bashrc
 
 conda config --set always_yes yes --set changeps1 no
