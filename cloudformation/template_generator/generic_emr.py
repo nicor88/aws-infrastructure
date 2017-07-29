@@ -118,17 +118,24 @@ cluster = template.add_resource(emr.Cluster(
     ),
     LogUri='s3://nicor-dev/logs/emr',
     BootstrapActions=[
+        # emr.BootstrapActionConfig(
+        #     Name='Move Home',
+        #     ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
+        #         Path='s3://nicor-dev/deployments/emr/bootstrap_actions/move_home.sh'
+        #     )
+        # ),
+        # emr.BootstrapActionConfig(
+        #     Name='Install Conda',
+        #     ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
+        #         Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh',
+        #         # Args=['conda_hone']
+        #     )
+        # ),
         emr.BootstrapActionConfig(
-            Name='Move Home',
+            Name='Install and set up Jupyter',
             ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
-                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/move_home.sh'
-            )
-        ),
-        emr.BootstrapActionConfig(
-            Name='Install Conda',
-            ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
-                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh',
-                # Args=['conda_hone']
+                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_jupyter.sh',
+                Args=['testemr', 's3://nicor-dev/jupyter-notebooks/']
             )
         )
     ],
