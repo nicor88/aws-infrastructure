@@ -5,7 +5,7 @@ import os
 
 from troposphere import ec2
 import troposphere.emr as emr
-from troposphere import GetAtt, Output, Ref, Tags, Template
+from troposphere import GetAtt, Output, Parameter, Ref, Tags, Template
 
 import cloudformation.utils as utils
 
@@ -18,6 +18,14 @@ template = Template()
 description = 'Stack containing EMR with conda in all nodes'
 template.add_description(description)
 template.add_version('2010-09-09')
+
+instances = template.add_parameter(
+    Parameter(
+        'Instances',
+        Type='Number',
+        Description='Number of core instances',
+        MaxValue='10'
+    ))
 
 emr_subnet = template.add_resource(
     ec2.Subnet(
@@ -87,11 +95,11 @@ master_security_group = template.add_resource(
 cluster = template.add_resource(emr.Cluster(
     'Cluster',
     Name='Generic Cluster',
-    ReleaseLabel='emr-5.6.0',
+    ReleaseLabel=cfg['version'],
     JobFlowRole='GenericEMRInstanceProfile',
     ServiceRole='GenericEMRServiceRole',
     Instances=emr.JobFlowInstancesConfig(
-        Ec2KeyName='nicor88-dev',
+        Ec2KeyName=cfg['ssh_key'],
         Ec2SubnetId=Ref(emr_subnet),
         MasterInstanceGroup=emr.InstanceGroupConfigProperty(
             Name='Master Instance',
@@ -101,7 +109,7 @@ cluster = template.add_resource(emr.Cluster(
         ),
         CoreInstanceGroup=emr.InstanceGroupConfigProperty(
             Name='Core Instance',
-            InstanceCount='2',
+            InstanceCount=Ref(instances),
             InstanceType='m4.xlarge',
             Market='SPOT',
             BidPrice='0.1'
@@ -164,6 +172,13 @@ print(template_json)
 stack_args = {
     'StackName': STACK_NAME,
     'TemplateBody': template_json,
+    'Parameters': [
+        {
+            'ParameterKey': 'Instances',
+            'ParameterValue': cfg['core_instances']
+        }
+
+    ],
     'Capabilities': [
         'CAPABILITY_IAM',
     ],
