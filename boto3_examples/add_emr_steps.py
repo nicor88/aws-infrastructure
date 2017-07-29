@@ -27,7 +27,6 @@ def spark_submit(*, cluster_id, args, step_name):
     return response
 
 # example
-cluster_id = 'your_cluster_id'
-args = ['/home/hadoop/tasks/to_execute.py', 'arg1', 'arg2']
-
-spark_submit(cluster_id=cluster_id, step_name='Execute Steps', args=args)
+# cluster_id = 'your_cluster_id'
+# args = ['/home/hadoop/tasks/to_execute.py', 'arg1', 'arg2']
+# spark_submit(cluster_id=cluster_id, step_name='Example Step', args=args)
