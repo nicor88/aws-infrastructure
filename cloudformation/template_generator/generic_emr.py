@@ -3,7 +3,7 @@ from pkg_resources import resource_string
 import ruamel_yaml as yaml
 import os
 
-from troposphere import ec2
+from troposphere import ec2, logs
 import troposphere.emr as emr
 from troposphere import GetAtt, Output, Parameter, Ref, Tags, Template
 
@@ -26,6 +26,11 @@ instances = template.add_parameter(
         Description='Number of core instances',
         MaxValue='10'
     ))
+
+logs = template.add_resource(logs.LogGroup('GenericEMR',
+                                           LogGroupName='/emr/generic_cluster',
+                                           )
+                             )
 
 emr_subnet = template.add_resource(
     ec2.Subnet(
@@ -129,6 +134,12 @@ cluster = template.add_resource(emr.Cluster(
             Name='Install Conda',
             ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
                 Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh'
+            )
+        ),
+        emr.BootstrapActionConfig(
+            Name='Deploy Steps',
+            ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
+                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/deploy_steps.sh'
             )
         )
     ],

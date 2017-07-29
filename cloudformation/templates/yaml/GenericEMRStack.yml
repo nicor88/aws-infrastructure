@@ -28,6 +28,9 @@ Resources:
       - Name: Install Conda
         ScriptBootstrapAction:
           Path: s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh
+      - Name: Deploy Steps
+        ScriptBootstrapAction:
+          Path: s3://nicor-dev/deployments/emr/bootstrap_actions/deploy_steps.sh
       Configurations:
       - Classification: spark-env
         Configurations:
@@ -110,3 +113,7 @@ Resources:
         Value: !Ref 'AWS::StackName'
       VpcId: vpc-8b708fec
     Type: AWS::EC2::Subnet
+  GenericEMR:
+    Properties:
+      LogGroupName: /emr/generic_cluster
+    Type: AWS::Logs::LogGroup
