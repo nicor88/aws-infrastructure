@@ -20,15 +20,15 @@ fi
 wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/hadoop/miniconda.sh
 /bin/bash /home/hadoop/miniconda.sh -b -p /home/hadoop/miniconda
 
-echo '\nexport PATH=$HOME/miniconda/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
+# setup conda
+echo -e "\nexport PATH=/home/hadoop/miniconda/bin:$PATH" >> /home/hadoop/.bashrc
+source /home/hadoop/.bashrc
 
 conda config --set always_yes yes --set changeps1 no
-
-conda install conda=4.2.13
-
 conda config -f --add channels conda-forge
 conda config -f --add channels defaults
 
+# install libs
 conda install hdfs3 findspark ujson jsonschema toolz boto3 py4j numpy pandas
 
 # cleanup
