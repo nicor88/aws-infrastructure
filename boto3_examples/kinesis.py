@@ -1,5 +1,6 @@
 import os
 import boto3
+from botocore.client import Config
 import json
 import logging
 import boto3_examples.utils as u
@@ -12,8 +13,11 @@ os.environ["AWS_DEFAULT_REGION"] = "eu-west-1"
 os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
 
 # configure client using bot3
-kinesis = boto3.client('kinesis')
 
+# if you are using a lambda function to put data into a kinesis stream be sure that the timeout
+# of boto3 client is < that the timeout of the lambda function
+kinesis = boto3.client('kinesis', config=Config(connect_timeout=1000))
+# https://github.com/boto/botocore/pull/891
 
 # put a single record to the stream
 def put_one_record_to_kinesis(*, stream_name):
