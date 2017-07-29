@@ -94,7 +94,7 @@
                     }
                 },
                 "JobFlowRole": "GenericEMRInstanceProfile",
-                "LogUri": "s3://nicor-dev/logs/emr",
+                "LogUri": "s3://nicor-dev/logs/emr/generic",
                 "Name": "Generic Cluster",
                 "ReleaseLabel": "emr-5.6.0",
                 "ServiceRole": "GenericEMRServiceRole",
@@ -144,12 +144,6 @@
                         "FromPort": "18080",
                         "IpProtocol": "tcp",
                         "ToPort": "18080"
-                    },
-                    {
-                        "CidrIp": "0.0.0.0/0",
-                        "FromPort": "8888",
-                        "IpProtocol": "tcp",
-                        "ToPort": "8888"
                     }
                 ],
                 "Tags": [

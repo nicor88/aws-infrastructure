@@ -75,13 +75,6 @@ master_security_group = template.add_resource(
                 FromPort='18080',
                 ToPort='18080',
                 CidrIp='0.0.0.0/0'
-            ),
-            # enable Jupyter Port
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='8888',
-                ToPort='8888',
-                CidrIp='0.0.0.0/0'
             )
         ],
         Tags=Tags(
@@ -116,26 +109,18 @@ cluster = template.add_resource(emr.Cluster(
         AdditionalMasterSecurityGroups=[Ref(master_security_group)],
         # AdditionalSlaveSecurityGroups=[Ref(emr_additional_slave_sg_param)]
     ),
-    LogUri='s3://nicor-dev/logs/emr',
+    LogUri='s3://nicor-dev/logs/emr/generic',
     BootstrapActions=[
-        # emr.BootstrapActionConfig(
-        #     Name='Move Home',
-        #     ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
-        #         Path='s3://nicor-dev/deployments/emr/bootstrap_actions/move_home.sh'
-        #     )
-        # ),
-        # emr.BootstrapActionConfig(
-        #     Name='Install Conda',
-        #     ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
-        #         Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh',
-        #         # Args=['conda_hone']
-        #     )
-        # ),
         emr.BootstrapActionConfig(
-            Name='Install and set up Jupyter',
+            Name='Move Home',
             ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
-                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_jupyter.sh',
-                Args=['testemr', 's3://nicor-dev/jupyter-notebooks/']
+                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/move_home.sh'
+            )
+        ),
+        emr.BootstrapActionConfig(
+            Name='Install Conda',
+            ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
+                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh'
             )
         )
     ],
@@ -197,8 +182,3 @@ utils.write_template(**stack_args)
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
-
-# get the created cluster id
-# resources = cfn.describe_stack_resources(StackName=STACK_NAME)['StackResources']
-# cluster_id = cfn.describe_stack_resource(StackName=STACK_NAME,
-#                                      LogicalResourceId='Cluster')['StackResourceDetail']['PhysicalResourceId']
