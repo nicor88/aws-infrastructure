@@ -1,0 +1,15 @@
+region: 'eu-west-1'
+stack_name: GenericEMRStack
+
+applications:
+  - Ganglia
+  - Hadoop
+  - Hive
+  - Presto
+  - Spark
+
+network:
+  vpc_id: 'vpc-8b708fec'
+  public_route_table: 'rtb-1197ed76'
+  subnet_cidr_block: 172.31.2.0/24
+  subnet_availability_zone: eu-west-1a
