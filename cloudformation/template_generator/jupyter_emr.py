@@ -24,7 +24,7 @@ instances = template.add_parameter(
         'Instances',
         Type='Number',
         Description='Number of core instances',
-        MaxValue='40'
+        MaxValue='10'
     ))
 
 

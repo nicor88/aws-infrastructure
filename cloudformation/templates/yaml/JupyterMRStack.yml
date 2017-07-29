@@ -10,7 +10,7 @@ Outputs:
 Parameters:
   Instances:
     Description: Number of core instances
-    MaxValue: '40'
+    MaxValue: '10'
     Type: Number
 Resources:
   Cluster:
