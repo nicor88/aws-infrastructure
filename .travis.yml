@@ -35,6 +35,7 @@ before_deploy:
   # emr deployment
   - mkdir -p dist/emr
   - cp -r emr/bootstrap_actions dist/emr/bootstrap_actions
+  - cp -r emr/steps dist/emr/steps
 
 deploy:
   provider:          s3
