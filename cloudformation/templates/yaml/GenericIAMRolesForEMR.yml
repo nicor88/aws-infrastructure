@@ -49,6 +49,15 @@ Resources:
             - '*'
           Version: '2012-10-17'
         PolicyName: GrantS3
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - cloudformation:DeleteStack
+            Effect: Allow
+            Resource:
+            - arn:aws:cloudformation:eu-west-1:*:stack/GenericEMRStack/*
+          Version: '2012-10-17'
+        PolicyName: CfnDeleteStack
       RoleName: GenericEMRJobFlowRole
     Type: AWS::IAM::Role
   EMRServiceRole:

@@ -84,6 +84,22 @@ emr_job_flow_role = template.add_resource(
                         ),
                     ]
                 }),
+            iam.Policy(
+                PolicyName='CfnDeleteStack',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('cloudformation', 'DeleteStack')
+                            ],
+                            Resource=[
+                                'arn:aws:cloudformation:eu-west-1:*:stack/GenericEMRStack/*'
+                            ]
+                        ),
+                    ]
+                }),
         ],
         # ManagedPolicyArns=[
         #     'arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role'
