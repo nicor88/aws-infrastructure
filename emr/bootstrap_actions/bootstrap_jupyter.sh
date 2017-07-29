@@ -17,10 +17,10 @@ if [ ! -d /mnt/home ]; then
 fi
 
 # Install conda
-wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O /home/hadoop/miniconda.sh \
-    && /bin/bash ~/miniconda.sh -b -p $HOME/conda
+wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/hadoop/miniconda.sh
+/bin/bash /home/hadoop/miniconda.sh -b -p /home/hadoop/miniconda
 
-echo '\nexport PATH=$HOME/conda/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
+echo '\nexport PATH=$HOME/miniconda/bin:$PATH' >> $HOME/.bashrc && source $HOME/.bashrc
 
 conda config --set always_yes yes --set changeps1 no
 
@@ -29,15 +29,10 @@ conda install conda=4.2.13
 conda config -f --add channels conda-forge
 conda config -f --add channels defaults
 
-conda install hdfs3 findspark ujson jsonschema toolz boto3 py4j numpy pandas==0.19.2
+conda install hdfs3 findspark ujson jsonschema toolz boto3 py4j numpy pandas
 
 # cleanup
 rm ~/miniconda.sh
-
-echo bootstrap_conda.sh completed. PATH now: $PATH
-export PYSPARK_PYTHON="/home/hadoop/conda/bin/python3.5"
-
-############### -------------- master node -------------- ###############
 
 IS_MASTER=false
 if grep isMaster /mnt/var/lib/info/instance.json | grep true;
@@ -107,9 +102,8 @@ chdir /mnt/$BUCKET/$FOLDER
 
 script
   sudo su - hadoop > /var/log/jupyter.log 2>&1 <<BASH_SCRIPT
-        export PYSPARK_DRIVER_PYTHON="/home/hadoop/conda/bin/jupyter"
+        export PYSPARK_DRIVER_PYTHON="/home/hadoop/miniconda/bin/jupyter"
         export PYSPARK_DRIVER_PYTHON_OPTS="notebook --log-level=INFO"
-        export PYSPARK_PYTHON=/home/hadoop/conda/bin/python3.5
         export JAVA_HOME="/etc/alternatives/jre"
         pyspark
   BASH_SCRIPT
