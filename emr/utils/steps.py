@@ -4,8 +4,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def send_command():
-    raise NotImplementedError
+def send_command(cluster_id, args, step_name='Spark Submit Job'):
+    emr = boto3.client('emr')
+    # description cluster
+    desc = emr.describe_cluster(ClusterId=cluster_id)
+    logger.info('Adding step to cluster {} {}'.format(cluster_id,
+                                                      desc.get('Cluster', {}).get('Name')))
+
+    step_example_with_params = {'ActionOnFailure': 'CONTINUE',
+                                'HadoopJarStep': {'Args': args,
+                                                  'Jar': 'command-runner.jar'},
+                                'Name': step_name}
+    logger.info(step_example_with_params)
+
+    response = emr.add_job_flow_steps(JobFlowId=cluster_id,
+                                      Steps=[step_example_with_params])
 
 
 def spark_submit(*, cluster_id, args, step_name='Spark Submit Job'):
