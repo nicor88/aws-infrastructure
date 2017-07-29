@@ -1,0 +1,111 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack containing EMR with conda in all nodes
+Outputs:
+  EMRCluster:
+    Description: EMRCluster
+    Value: !Ref 'Cluster'
+  EMRClusterMasterDNS:
+    Description: EMRCluster
+    Value: !GetAtt [Cluster, MasterPublicDNS]
+Resources:
+  Cluster:
+    Properties:
+      Applications:
+      - Name: Ganglia
+      - Name: Hadoop
+      - Name: Hive
+      - Name: Presto
+      - Name: Spark
+      BootstrapActions:
+      - Name: Install and set up Jupyter
+        ScriptBootstrapAction:
+          Args:
+          - testemr
+          - s3://nicor-dev/jupyter-notebooks/
+          Path: s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_jupyter.sh
+      Configurations:
+      - Classification: spark-env
+        Configurations:
+        - Classification: export
+          ConfigurationProperties:
+            PYSPARK_DRIVER_PYTHON: /home/hadoop/miniconda/bin/python
+            PYSPARK_PYTHON: /home/hadoop/miniconda/bin/python
+            PYTHONHASHSEED: '123'
+            PYTHONPATH: /home/hadoop/miniconda/bin/python:/usr/lib/spark/python/:$PYTHONPATH
+            SPARK_HOME: /usr/lib/spark
+      Instances:
+        AdditionalMasterSecurityGroups:
+        - !Ref 'EMRMasterSecurityGroup'
+        CoreInstanceGroup:
+          BidPrice: '0.1'
+          InstanceCount: '2'
+          InstanceType: m4.xlarge
+          Market: SPOT
+          Name: Core Instance
+        Ec2KeyName: nicor88-dev
+        Ec2SubnetId: !Ref 'EMRSubet'
+        MasterInstanceGroup:
+          InstanceCount: '1'
+          InstanceType: m4.xlarge
+          Market: ON_DEMAND
+          Name: Master Instance
+      JobFlowRole: GenericEMRInstanceProfile
+      LogUri: s3://nicor-dev/logs/emr/jupyter
+      Name: Jupyter Cluster
+      ReleaseLabel: emr-5.6.0
+      ServiceRole: GenericEMRServiceRole
+      Tags:
+      - Key: Name
+        Value: jupyter-cluster
+      VisibleToAllUsers: 'true'
+    Type: AWS::EMR::Cluster
+  DevPublicSubnetRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-1197ed76
+      SubnetId: !Ref 'EMRSubet'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  EMRMasterSecurityGroup:
+    Properties:
+      GroupDescription: Enable Apps port for Master Node
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: '22'
+        IpProtocol: tcp
+        ToPort: '22'
+      - CidrIp: 0.0.0.0/0
+        FromPort: '80'
+        IpProtocol: tcp
+        ToPort: '80'
+      - CidrIp: 0.0.0.0/0
+        FromPort: '8088'
+        IpProtocol: tcp
+        ToPort: '8088'
+      - CidrIp: 0.0.0.0/0
+        FromPort: '18080'
+        IpProtocol: tcp
+        ToPort: '18080'
+      - CidrIp: 0.0.0.0/0
+        FromPort: '8888'
+        IpProtocol: tcp
+        ToPort: '8888'
+      Tags:
+      - Key: Name
+        Value: jupyter-emr-master-sg
+      - Key: StackName
+        Value: !Ref 'AWS::StackName'
+      VpcId: vpc-8b708fec
+    Type: AWS::EC2::SecurityGroup
+  EMRSubet:
+    Properties:
+      AvailabilityZone: eu-west-1a
+      CidrBlock: 172.31.3.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+      - Key: AZ
+        Value: eu-west-1
+      - Key: Name
+        Value: jupyter-emr-subnet
+      - Key: StackName
+        Value: !Ref 'AWS::StackName'
+      VpcId: vpc-8b708fec
+    Type: AWS::EC2::Subnet
