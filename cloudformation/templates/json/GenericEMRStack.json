@@ -61,7 +61,11 @@
                     {
                         "Name": "Deploy Steps",
                         "ScriptBootstrapAction": {
-                            "Path": "s3://nicor-dev/deployments/emr/bootstrap_actions/deploy_steps.sh"
+                            "Args": [
+                                "s3://nicor-dev/deployments/emr/steps/",
+                                "/home/hadoop/steps"
+                            ],
+                            "Path": "s3://nicor-dev/deployments/emr/bootstrap_actions/deploy.sh"
                         }
                     }
                 ],

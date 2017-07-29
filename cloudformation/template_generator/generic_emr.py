@@ -139,7 +139,8 @@ cluster = template.add_resource(emr.Cluster(
         emr.BootstrapActionConfig(
             Name='Deploy Steps',
             ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
-                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/deploy_steps.sh'
+                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/deploy.sh',
+                Args=['s3://nicor-dev/deployments/emr/steps/', '/home/hadoop/steps']
             )
         )
     ],
