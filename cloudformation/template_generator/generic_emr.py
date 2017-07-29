@@ -111,13 +111,19 @@ cluster = template.add_resource(emr.Cluster(
             InstanceCount='2',
             InstanceType='m4.xlarge',
             Market='SPOT',
-            BidPrice='0.2'
+            BidPrice='0.1'
         ),
         AdditionalMasterSecurityGroups=[Ref(master_security_group)],
         # AdditionalSlaveSecurityGroups=[Ref(emr_additional_slave_sg_param)]
     ),
     LogUri='s3://nicor-dev/logs/emr',
     BootstrapActions=[
+        emr.BootstrapActionConfig(
+            Name='Move Home',
+            ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(
+                Path='s3://nicor-dev/deployments/emr/bootstrap_actions/move_home.sh'
+            )
+        ),
         emr.BootstrapActionConfig(
             Name='Install Conda',
             ScriptBootstrapAction=emr.ScriptBootstrapActionConfig(

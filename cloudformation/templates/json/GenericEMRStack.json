@@ -40,6 +40,12 @@
                 ],
                 "BootstrapActions": [
                     {
+                        "Name": "Move Home",
+                        "ScriptBootstrapAction": {
+                            "Path": "s3://nicor-dev/deployments/emr/bootstrap_actions/move_home.sh"
+                        }
+                    },
+                    {
                         "Name": "Install Conda",
                         "ScriptBootstrapAction": {
                             "Path": "s3://nicor-dev/deployments/emr/bootstrap_actions/bootstrap_conda.sh"
@@ -70,7 +76,7 @@
                         }
                     ],
                     "CoreInstanceGroup": {
-                        "BidPrice": "0.2",
+                        "BidPrice": "0.1",
                         "InstanceCount": "2",
                         "InstanceType": "m4.xlarge",
                         "Market": "SPOT",
