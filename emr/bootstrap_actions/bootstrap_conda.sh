@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Install conda
-wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/hadoop/miniconda.sh \
-    && /bin/bash ~/miniconda.sh -b -p $HOME/conda
+wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/hadoop/miniconda.sh
+/bin/bash /home/hadoop/miniconda.sh -b -p /home/hadoop/miniconda
 
 conda config --set always_yes yes --set changeps1 no
 conda config -f --add channels conda-forge
