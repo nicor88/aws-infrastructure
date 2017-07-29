@@ -100,6 +100,23 @@ emr_job_flow_role = template.add_resource(
                         ),
                     ]
                 }),
+            # TODO to remove just to try
+            iam.Policy(
+                PolicyName='FullEc2Access',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('ec2', '*')
+                            ],
+                            Resource=[
+                                '*'
+                            ]
+                        ),
+                    ]
+                }),
         ],
         # ManagedPolicyArns=[
         #     'arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role'

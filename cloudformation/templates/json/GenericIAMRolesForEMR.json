@@ -110,6 +110,23 @@
                             "Version": "2012-10-17"
                         },
                         "PolicyName": "CfnDeleteStack"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ec2:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "FullEc2Access"
                     }
                 ],
                 "RoleName": "GenericEMRJobFlowRole"
