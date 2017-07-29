@@ -86,7 +86,7 @@ master_security_group = template.add_resource(
         ],
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
-            Name='generic-emr-master-node-sg'
+            Name='generic-emr-master-sg'
         )
     )
 )

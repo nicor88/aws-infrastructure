@@ -90,7 +90,7 @@ Resources:
         ToPort: '8888'
       Tags:
       - Key: Name
-        Value: generic-emr-master-node-sg
+        Value: generic-emr-master-sg
       - Key: StackName
         Value: !Ref 'AWS::StackName'
       VpcId: vpc-8b708fec
