@@ -1,6 +1,8 @@
 region: 'eu-west-1'
 stack_name: JupyterMRStack
-
+core_instances: 2
+version: emr-5.7.0
+ssh_key: nicor88-dev
 applications:
   - Ganglia
   - Hadoop
