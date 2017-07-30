@@ -9,13 +9,9 @@ from awacs.aws import Statement, Allow, Action
 
 import cloudformation.utils as utils
 
-# setup aws session
-os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
-os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
-cfn = boto3.client('cloudformation')
-
-
 cfg = yaml.load(resource_string('cloudformation.config', 'kinesis_cross_account_cfg.yml'))
+
+STACK_NAME = cfg['stack_name']
 
 template = Template()
 description = 'Stack containing kinesis and a lambda writing to another account'
@@ -150,7 +146,7 @@ template_json = template.to_json(indent=4)
 print(template_json)
 
 stack_args = {
-    'StackName': cfg['stack_name'],
+    'StackName': STACK_NAME,
     'TemplateBody': template_json,
     'Capabilities': [
         'CAPABILITY_IAM',
@@ -163,6 +159,7 @@ stack_args = {
     ]
 }
 
+cfn = boto3.client('cloudformation')
 cfn.validate_template(TemplateBody=template_json)
 utils.write_template(**stack_args)
 

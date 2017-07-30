@@ -1,0 +1,6 @@
+stack_name: NetworkingStack
+region: 'eu-west-1'
+default_subnet_availability_zone: 'eu-west-1a'
+vpc_id: 'vpc-8b708fec'
+public_route_table: 'rtb-1197ed76'
+

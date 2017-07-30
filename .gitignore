@@ -1,5 +1,13 @@
-# boto notebooks
-boto3/.ipynb_checkpoints/
+# General python ignore
+*/.ipynb_checkpoints/
+*/__pycache__/
+*.pyc
+
+# Dist
+dist
+
+# Examples
+examples
 
 # Pycharm
 /.idea

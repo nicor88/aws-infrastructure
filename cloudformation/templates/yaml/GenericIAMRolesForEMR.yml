@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack containing Generic IAM roles for EMR
+Outputs:
+  EMRInstanceProfile:
+    Description: Instance profile for nodes in EMR cluster
+    Value: !Ref 'EMRInstanceProfile'
+  EMRInstanceProfileArn:
+    Description: ARN of Instance profile for nodes in EMR cluster
+    Value: !GetAtt [EMRInstanceProfile, Arn]
+  EMRJobFlowRole:
+    Description: Job Flow role needed by EMR
+    Value: !Ref 'EMRJobFlowRole'
+  EMRServiceRole:
+    Description: Service role needed by EMR
+    Value: !Ref 'EMRServiceRole'
+Resources:
+  EMRInstanceProfile:
+    Properties:
+      InstanceProfileName: GenericEMRInstanceProfile
+      Roles:
+      - !Ref 'EMRJobFlowRole'
+    Type: AWS::IAM::InstanceProfile
+  EMRJobFlowRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:*
+            Effect: Allow
+            Resource:
+            - arn:aws:logs:*:*:*
+          Version: '2012-10-17'
+        PolicyName: GrantLogs
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:*
+            Effect: Allow
+            Resource:
+            - '*'
+          Version: '2012-10-17'
+        PolicyName: GrantS3
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - lambda:InvokeFunction
+            Effect: Allow
+            Resource:
+            - arn:aws:lambda:eu-west-1:*:function:delete_cfn_stack
+          Version: '2012-10-17'
+        PolicyName: InvokeDeleteLambda
+      RoleName: GenericEMRJobFlowRole
+    Type: AWS::IAM::Role
+  EMRServiceRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - elasticmapreduce.amazonaws.com
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole
+      RoleName: GenericEMRServiceRole
+    Type: AWS::IAM::Role

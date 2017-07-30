@@ -1,15 +1,17 @@
+[![Build Status](https://travis-ci.org/nicor88/aws-dev.svg?branch=master)](https://travis-ci.org/nicor88/aws-dev)
+
 # aws-dev
 Collection of examples in AWS
 
 ## AWS Conda Environment
 Install Anaconda o Miniconda
-<pre>conda env create -f conda-env-dev.yml
+<pre>conda env create -f conda-dev-env.yml
 source activate aws-dev
 </pre>
 The env contain also **aws cli**
 
 After installing a new package update the env file:
-<pre>conda env export > conda-env-dev.yml
+<pre>conda env export > conda-dev-env.yml
 </pre>
 
 ## AWS Profiles

@@ -1,4 +1,3 @@
-import os
 import boto3
 
 from troposphere import awslambda, iam
@@ -7,11 +6,6 @@ from awacs.aws import Statement, Allow, Action
 from troposphere import Template, Output, Ref, GetAtt
 
 import cloudformation.utils as utils
-
-# setup aws session
-os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
-os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
-cfn = boto3.client('cloudformation')
 
 STACK_NAME = 'CustomResourceLambdaStack'
 
@@ -115,9 +109,10 @@ stack_args = {
     ]
 }
 
+cfn = boto3.client('cloudformation')
 cfn.validate_template(TemplateBody=template_json)
-
 utils.write_template(**stack_args)
+
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)

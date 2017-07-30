@@ -1,4 +1,3 @@
-import os
 import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
@@ -9,16 +8,12 @@ from troposphere import Base64, Join, Output, Parameter, Ref, Tags, Template
 from troposphere.cloudformation import Init, InitFile, InitFiles, InitConfig, InitService, \
     InitServices
 from troposphere.autoscaling import Metadata
+
 import cloudformation.utils as utils
 
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'boilerplate_ec2_config.yml'))
-
-# setup aws session
-
-# TODO to remove
-os.environ['AWS_DEFAULT_REGION'] = cfg['region']
-os.environ['AWS_PROFILE'] = 'nicor88-aws-dev'
+networking_resources = utils.get_stack_resources(stack_name=cfg['networking_stack_name'])
 
 STACK_NAME = cfg['ec2']['stack_name']
 
@@ -26,54 +21,6 @@ template = Template()
 description = 'Dev Server Stack'
 template.add_description(description)
 template.add_version('2010-09-09')
-
-# security group
-all_ssh = template.add_resource(
-    ec2.SecurityGroup(
-        'AllSSH',
-        VpcId=cfg['network']['vpc_id'],
-        GroupDescription='Allow SSH traffic from Everywhere',
-        SecurityGroupIngress=[
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='22',
-                ToPort='22',
-                CidrIp='0.0.0.0/0'
-            )
-        ],
-        Tags=Tags(
-            StackName=Ref('AWS::StackName'),
-            Name='all-ssh'
-        )
-    )
-)
-
-# subnet
-# by default all the subnets are put in the default subnet, that is a public subnet with a route
-# to Internet Gatewy
-# TODO move this resource to a DevNetworking Stack
-dev_public_subnet = template.add_resource(
-    ec2.Subnet(
-        'DevPublicSubnet',
-        AvailabilityZone='eu-west-1a',
-        CidrBlock='172.31.1.0/24',
-        VpcId=cfg['network']['vpc_id'],
-        MapPublicIpOnLaunch=True,
-        Tags=Tags(
-            StackName=Ref('AWS::StackName'),
-            AZ=cfg['region'],
-            Name='dev-public-subnet'
-        )
-    )
-)
-
-template.add_resource(
-    ec2.SubnetRouteTableAssociation('DevPublicSubnetRouteTableAssociation',
-                                    RouteTableId=cfg['network']['public_route_table'],
-                                    SubnetId=Ref(dev_public_subnet)
-                                    )
-)
-
 
 # Define Instance Metadata
 instance_metadata = Metadata(
@@ -162,9 +109,9 @@ instance_metadata = Metadata(
 ec2_instance = template.add_resource(ec2.Instance(
     'DevServer',
     InstanceType='t2.micro',
-    ImageId='ami-d7b9a2b1',  # 2017.03 ami-d7b9a2b1  # after resizing ami-594bab20
-    SubnetId=Ref(dev_public_subnet),
-    SecurityGroupIds=[Ref(all_ssh)],
+    ImageId=cfg['ec2']['ami_version'],
+    SubnetId=networking_resources['GenericEC2Subnet'],
+    SecurityGroupIds=[networking_resources['AllSshSecurityGroup']],
     InstanceInitiatedShutdownBehavior='stop',
     Monitoring=True,
     KeyName='nicor88-dev',
@@ -206,13 +153,6 @@ ec2_instance = template.add_resource(ec2.Instance(
 
 # outputs
 template.add_output([
-    Output('AllSSHsg',
-           Description='Security group to enable SSH from everywhere',
-           Value=Ref(all_ssh)),
-    Output('DevSubnet',
-           Description='Public Subnet used for Dev Servers',
-           Value=Ref(dev_public_subnet)),
-
     Output('DevServer',
            Description='EC2 Instance',
            Value=Ref(ec2_instance))
@@ -233,7 +173,7 @@ stack_args = {
 }
 
 cfn = boto3.client('cloudformation')
-# cfn.validate_template(TemplateBody=template_json)
+cfn.validate_template(TemplateBody=template_json)
 utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)

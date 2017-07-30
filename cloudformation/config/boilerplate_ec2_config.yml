@@ -2,8 +2,5 @@ region: 'eu-west-1'
 ec2:
   stack_name: 'BoilerplateEC2Stack'
   instance_type: 't2.micro'
-  ami_version: 'ami-a8d2d7ce' # AMI found using https://cloud-images.ubuntu.com/locator/ec2/
-
-network:
-  vpc_id: 'vpc-8b708fec'
-  public_route_table: 'rtb-1197ed76'
+  ami_version: 'ami-d7b9a2b1'
+networking_stack_name: NetworkingStack
