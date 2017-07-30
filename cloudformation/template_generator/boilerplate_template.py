@@ -2,14 +2,14 @@ import boto3
 from pkg_resources import resource_string
 import ruamel_yaml as yaml
 
-from troposphere import GetAtt, Output, Parameter, Ref, Tags, Template
+from troposphere import GetAtt, Join, Output, Parameter, Ref, Tags, Template
 
 import cloudformation.utils as utils
 
 # load config
-# cfg = yaml.load(resource_string('cloudformation.config', 'base_config.yml'))
+cfg = yaml.load(resource_string('cloudformation.config', 'boilerplate_config.yml'))
 
-STACK_NAME = 'BaseStack'
+STACK_NAME = cfg['stack_name']
 
 template = Template()
 description = 'Description for the stack'
@@ -39,7 +39,7 @@ stack_args = {
     'Tags': [
         {
             'Key': 'Purpose',
-            'Value': 'BaseTemplate'
+            'Value': 'BoilerplateTemplate'
         }
     ]
 }
