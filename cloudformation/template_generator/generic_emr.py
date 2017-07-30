@@ -192,7 +192,7 @@ stack_args = {
     'Tags': [
         {
             'Key': 'Purpose',
-            'Value': 'CondaEMR'
+            'Value': 'GenericEMR'
         }
     ]
 }
