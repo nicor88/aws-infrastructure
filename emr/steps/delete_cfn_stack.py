@@ -30,5 +30,6 @@ if __name__ == "__main__":
     function_name = 'delete_cfn_stack'
     res = aws_lambda.invoke(FunctionName=function_name,
                             Payload=json.dumps({'stack_name': stack_name}))
+    # TODO send a message to cloudwatch logs here
     logger.info(res['Payload'].read().decode())
 
