@@ -16,12 +16,21 @@ def write_template(**stack_args):
         logger.info('wrote yaml template')
 
 
-def get_cluster_id(*,stack_name, ClusterResourceName='Cluster'):
+def get_cluster_id(*, stack_name, cluster_name='Cluster'):
     cfn = boto3.client('cloudformation')
     try:
         cluster = cfn.describe_stack_resource(StackName=stack_name,
-                                             LogicalResourceId=ClusterResourceName)['StackResourceDetail']
+                                              LogicalResourceId=cluster_name)['StackResourceDetail']
         cluster_id = cluster['PhysicalResourceId']
         return cluster_id
     except Exception as e:
         raise e
+
+
+def get_stack_resources(*, stack_name):
+    cfn = boto3.client('cloudformation')
+    stack = cfn.describe_stacks(StackName=stack_name)['Stacks'][0]
+    outputs = stack['Outputs']
+    resources = {o['OutputKey']: o['OutputValue'] for o in outputs}
+    return resources
+

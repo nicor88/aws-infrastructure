@@ -1,5 +1,6 @@
 region: 'eu-west-1'
 stack_name: JupyterMRStack
+networking_stack_name: NetworkingStack
 core_instances: '2'
 version: emr-5.7.0
 ssh_key: nicor88-dev
@@ -9,9 +10,3 @@ applications:
   - Hive
   - Presto
   - Spark
-
-network:
-  vpc_id: 'vpc-8b708fec'
-  public_route_table: 'rtb-1197ed76'
-  subnet_cidr_block: 172.31.3.0/24
-  subnet_availability_zone: eu-west-1a

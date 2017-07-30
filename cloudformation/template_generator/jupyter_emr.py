@@ -11,6 +11,7 @@ import cloudformation.utils as utils
 
 # load config
 cfg = yaml.load(resource_string('cloudformation.config', 'jupyter_emr_config.yml'))
+networking_resources = utils.get_stack_resources(stack_name=cfg['networking_stack_name'])
 
 STACK_NAME = cfg['stack_name']
 
@@ -27,79 +28,6 @@ instances = template.add_parameter(
         MaxValue='10'
     ))
 
-
-emr_subnet = template.add_resource(
-    ec2.Subnet(
-        'EMRSubet',
-        AvailabilityZone=cfg['network']['subnet_availability_zone'],
-        CidrBlock=cfg['network']['subnet_cidr_block'],
-        VpcId=cfg['network']['vpc_id'],
-        MapPublicIpOnLaunch=True,  #TODO change this after a better design of network stack
-        Tags=Tags(
-            StackName=Ref('AWS::StackName'),
-            AZ=cfg['region'],
-            Name='jupyter-emr-subnet'
-        )
-    )
-)
-
-template.add_resource(
-    ec2.SubnetRouteTableAssociation('DevPublicSubnetRouteTableAssociation',
-                                    RouteTableId=cfg['network']['public_route_table'],
-                                    SubnetId=Ref(emr_subnet)
-                                    )
-)
-
-# master security group
-master_security_group = template.add_resource(
-    ec2.SecurityGroup(
-        'EMRMasterSecurityGroup',
-        VpcId=cfg['network']['vpc_id'],
-        GroupDescription='Enable Apps port for Master Node',
-        SecurityGroupIngress=[
-            # enable ssh
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='22',
-                ToPort='22',
-                CidrIp='0.0.0.0/0'
-            ),
-            # enable port 80 for Ganglia
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='80',
-                ToPort='80',
-                CidrIp='0.0.0.0/0'
-            ),
-            # enable Spark DAG
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='8088',
-                ToPort='8088',
-                CidrIp='0.0.0.0/0'
-            ),
-            # enable Spark History
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='18080',
-                ToPort='18080',
-                CidrIp='0.0.0.0/0'
-            ),
-            # enable Jupyter Port
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='8888',
-                ToPort='8888',
-                CidrIp='0.0.0.0/0'
-            )
-        ],
-        Tags=Tags(
-            StackName=Ref('AWS::StackName'),
-            Name='jupyter-emr-master-sg'
-        )
-    )
-)
-
 cluster = template.add_resource(emr.Cluster(
     'Cluster',
     Name='Jupyter Cluster',
@@ -108,7 +36,7 @@ cluster = template.add_resource(emr.Cluster(
     ServiceRole='GenericEMRServiceRole',
     Instances=emr.JobFlowInstancesConfig(
         Ec2KeyName=cfg['ssh_key'],
-        Ec2SubnetId=Ref(emr_subnet),
+        Ec2SubnetId=networking_resources['JupyterEMRSubnet'],
         MasterInstanceGroup=emr.InstanceGroupConfigProperty(
             Name='Master Instance',
             InstanceCount='1',
@@ -122,7 +50,7 @@ cluster = template.add_resource(emr.Cluster(
             Market='SPOT',
             BidPrice='0.1'
         ),
-        AdditionalMasterSecurityGroups=[Ref(master_security_group)],
+        AdditionalMasterSecurityGroups=[networking_resources['EMRMasterSecurityGroup']],
         # AdditionalSlaveSecurityGroups=[Ref(emr_additional_slave_sg_param)]
     ),
     LogUri='s3://nicor-dev/logs/emr/jupyter',
