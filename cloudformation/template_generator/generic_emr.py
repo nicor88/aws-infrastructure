@@ -3,7 +3,6 @@ from pkg_resources import resource_string
 import ruamel_yaml as yaml
 import os
 
-from troposphere import ec2, logs
 import troposphere.emr as emr
 from troposphere import GetAtt, Output, Parameter, Ref, Tags, Template
 
@@ -84,7 +83,8 @@ cluster = template.add_resource(emr.Cluster(
                     ConfigurationProperties={
                         "PYSPARK_PYTHON": os.path.join('/home/hadoop/miniconda', 'bin/python'),
                         "PYTHONPATH": os.path.join('/home/hadoop/miniconda', 'bin/python') + ":/usr/lib/spark/python/:$PYTHONPATH",
-                        "PYSPARK_DRIVER_PYTHON": os.path.join('/home/hadoop/miniconda', 'bin/python'),
+                        "PYSPARK_DRIVER_PYTHON": os.path.join('/home/hadoop/miniconda',
+                                                              'bin/python'),
                         "SPARK_HOME": "/usr/lib/spark",
                         "PYTHONHASHSEED": "123"
                     }

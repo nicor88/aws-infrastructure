@@ -3,7 +3,6 @@ from pkg_resources import resource_string
 import ruamel_yaml as yaml
 import os
 
-from troposphere import ec2
 import troposphere.emr as emr
 from troposphere import GetAtt, Output, Parameter, Ref, Tags, Template
 
