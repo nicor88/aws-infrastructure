@@ -12,8 +12,9 @@ def add_steps_with_termination(*, cluster_id):
     steps.spark_submit(cluster_id=cluster_id, step_name='JSON to Parquet - Step 2', args=step_2)
 
     # add step to terminate the cluster
-    terminate_cluster = ['/home/hadoop/miniconda/bin/python', '/home/hadoop/steps/delete_cfn_stack.py',
-            '--stack-name', 'GenericEMRStack']
+    terminate_cluster = ['/home/hadoop/miniconda/bin/python',
+                         '/home/hadoop/steps/delete_cfn_stack.py',
+                         '--stack-name', 'GenericEMRStack']
     steps.send_command(cluster_id=cluster_id, step_name='Delete CFN stack', args=terminate_cluster)
 
 # example
