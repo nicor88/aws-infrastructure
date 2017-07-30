@@ -2,87 +2,14 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Dev Server Stack",
     "Outputs": {
-        "AllSSHsg": {
-            "Description": "Security group to enable SSH from everywhere",
-            "Value": {
-                "Ref": "AllSSH"
-            }
-        },
         "DevServer": {
             "Description": "EC2 Instance",
             "Value": {
                 "Ref": "DevServer"
             }
-        },
-        "DevSubnet": {
-            "Description": "Public Subnet used for Dev Servers",
-            "Value": {
-                "Ref": "DevPublicSubnet"
-            }
         }
     },
     "Resources": {
-        "AllSSH": {
-            "Properties": {
-                "GroupDescription": "Allow SSH traffic from Everywhere",
-                "SecurityGroupIngress": [
-                    {
-                        "CidrIp": "0.0.0.0/0",
-                        "FromPort": "22",
-                        "IpProtocol": "tcp",
-                        "ToPort": "22"
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "all-ssh"
-                    },
-                    {
-                        "Key": "StackName",
-                        "Value": {
-                            "Ref": "AWS::StackName"
-                        }
-                    }
-                ],
-                "VpcId": "vpc-8b708fec"
-            },
-            "Type": "AWS::EC2::SecurityGroup"
-        },
-        "DevPublicSubnet": {
-            "Properties": {
-                "AvailabilityZone": "eu-west-1a",
-                "CidrBlock": "172.31.1.0/24",
-                "MapPublicIpOnLaunch": "true",
-                "Tags": [
-                    {
-                        "Key": "AZ",
-                        "Value": "eu-west-1"
-                    },
-                    {
-                        "Key": "Name",
-                        "Value": "dev-public-subnet"
-                    },
-                    {
-                        "Key": "StackName",
-                        "Value": {
-                            "Ref": "AWS::StackName"
-                        }
-                    }
-                ],
-                "VpcId": "vpc-8b708fec"
-            },
-            "Type": "AWS::EC2::Subnet"
-        },
-        "DevPublicSubnetRouteTableAssociation": {
-            "Properties": {
-                "RouteTableId": "rtb-1197ed76",
-                "SubnetId": {
-                    "Ref": "DevPublicSubnet"
-                }
-            },
-            "Type": "AWS::EC2::SubnetRouteTableAssociation"
-        },
         "DevServer": {
             "Metadata": {
                 "AWS::CloudFormation::Init": {
@@ -186,13 +113,9 @@
                 "KeyName": "nicor88-dev",
                 "Monitoring": "true",
                 "SecurityGroupIds": [
-                    {
-                        "Ref": "AllSSH"
-                    }
+                    "sg-389f2740"
                 ],
-                "SubnetId": {
-                    "Ref": "DevPublicSubnet"
-                },
+                "SubnetId": "subnet-43ab5018",
                 "Tags": [
                     {
                         "Key": "Name",

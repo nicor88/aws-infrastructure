@@ -85,6 +85,27 @@ template.add_resource(
                                     )
 )
 
+# Security groups
+all_ssh_security_group = template.add_resource(
+    ec2.SecurityGroup(
+        'AllSSH',
+        VpcId=cfg['vpc_id'],
+        GroupDescription='Allow SSH traffic from Everywhere',
+        SecurityGroupIngress=[
+            ec2.SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='22',
+                ToPort='22',
+                CidrIp='0.0.0.0/0'
+            )
+        ],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            Name='all-ssh-sg'
+        )
+    )
+)
+
 master_security_group = template.add_resource(
     ec2.SecurityGroup(
         'EMRMasterSecurityGroup',
@@ -136,12 +157,18 @@ master_security_group = template.add_resource(
 
 # Outputs
 template.add_output([
+    Output('GenericEC2Subnet',
+           Description='Public Subnet for Generic EC2 Instances',
+           Value=Ref(generic_ec2_public_subnet)),
     Output('GenericEMRSubnet',
            Description='Public Subnet for Generic EMR Cluster',
            Value=Ref(generic_emr_subnet)),
     Output('JupyterEMRSubnet',
            Description='Public Subnet for Jupyter EMR Cluster',
            Value=Ref(generic_emr_subnet)),
+    Output('AllSshSecurityGroup',
+           Description='Security group to enable SSH from Everywhere',
+           Value=Ref(all_ssh_security_group)),
     Output('EMRMasterSecurityGroup',
            Description='Security group to enable some app ports for Master Node',
            Value=Ref(master_security_group)),
