@@ -1,9 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Stack containing Networking Resources
 Outputs:
+  AllSshSecurityGroup:
+    Description: Security group to enable SSH from Everywhere
+    Value: !Ref 'AllSSH'
   EMRMasterSecurityGroup:
     Description: Security group to enable some app ports for Master Node
     Value: !Ref 'EMRMasterSecurityGroup'
+  GenericEC2Subnet:
+    Description: Public Subnet for Generic EC2 Instances
+    Value: !Ref 'EC2PublicSubnet'
   GenericEMRSubnet:
     Description: Public Subnet for Generic EMR Cluster
     Value: !Ref 'GenericEMRSubnet'
@@ -11,6 +17,21 @@ Outputs:
     Description: Public Subnet for Jupyter EMR Cluster
     Value: !Ref 'GenericEMRSubnet'
 Resources:
+  AllSSH:
+    Properties:
+      GroupDescription: Allow SSH traffic from Everywhere
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: '22'
+        IpProtocol: tcp
+        ToPort: '22'
+      Tags:
+      - Key: Name
+        Value: all-ssh-sg
+      - Key: StackName
+        Value: !Ref 'AWS::StackName'
+      VpcId: vpc-8b708fec
+    Type: AWS::EC2::SecurityGroup
   EC2PublicSubnet:
     Properties:
       AvailabilityZone: eu-west-1a
