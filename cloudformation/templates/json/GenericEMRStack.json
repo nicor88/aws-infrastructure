@@ -205,12 +205,6 @@
                 "VpcId": "vpc-8b708fec"
             },
             "Type": "AWS::EC2::Subnet"
-        },
-        "GenericEMR": {
-            "Properties": {
-                "LogGroupName": "/emr/generic_cluster"
-            },
-            "Type": "AWS::Logs::LogGroup"
         }
     }
 }

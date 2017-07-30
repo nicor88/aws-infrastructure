@@ -27,11 +27,6 @@ instances = template.add_parameter(
         MaxValue='10'
     ))
 
-logs = template.add_resource(logs.LogGroup('GenericEMR',
-                                           LogGroupName='/emr/generic_cluster',
-                                           )
-                             )
-
 emr_subnet = template.add_resource(
     ec2.Subnet(
         'EMRSubet',
