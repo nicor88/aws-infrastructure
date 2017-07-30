@@ -84,6 +84,7 @@ emr_job_flow_role = template.add_resource(
                         ),
                     ]
                 }),
+            # TODO to remove just to try
             iam.Policy(
                 PolicyName='CfnAccess',
                 PolicyDocument={
@@ -110,6 +111,23 @@ emr_job_flow_role = template.add_resource(
                             Effect=Allow,
                             Action=[
                                 Action('ec2', '*')
+                            ],
+                            Resource=[
+                                '*'
+                            ]
+                        ),
+                    ]
+                }),
+            # TODO to remove just to try
+            iam.Policy(
+                PolicyName='FullEMRAccess',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('elasticmapreduce', '*')
                             ],
                             Resource=[
                                 '*'

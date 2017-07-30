@@ -127,6 +127,23 @@
                             "Version": "2012-10-17"
                         },
                         "PolicyName": "FullEc2Access"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "elasticmapreduce:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "FullEMRAccess"
                     }
                 ],
                 "RoleName": "GenericEMRJobFlowRole"
