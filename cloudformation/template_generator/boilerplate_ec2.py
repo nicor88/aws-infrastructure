@@ -33,18 +33,18 @@ instance_metadata = Metadata(
                 'command': 'su - ec2-user -c "wget http://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh"',
             },
             'install_miniconda': {
-                 'command': 'su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"',
+                'command': 'su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"',
             },
             'remove_installer': {
-                 'command': 'rm -rf /home/ec2-user/miniconda.sh',
+                'command': 'rm -rf /home/ec2-user/miniconda.sh',
             }
         },
         files=InitFiles({
             # setup .bashrc
             '/home/ec2-user/.bashrc': InitFile(
                 content=Join('', [
-                             'export PATH="/home/ec2-user/miniconda/bin:$PATH"\n'
-                             ]),
+                    'export PATH="/home/ec2-user/miniconda/bin:$PATH"\n'
+                ]),
                 owner='ec2-user',
                 mode='000400',
                 group='ec2-user'),
@@ -69,7 +69,7 @@ instance_metadata = Metadata(
                               'triggers=post.update\n',
                               'path=Resources.DevServer.Metadata.AWS::CloudFormation::Init\n',
                               'action=/opt/aws/bin/cfn-init -v',
-                              ' --stack ',  Ref('AWS::StackId'),
+                              ' --stack ', Ref('AWS::StackId'),
                               ' --resource DevServer',
                               ' --region ', Ref('AWS::Region'),
                               '\n'
@@ -92,19 +92,6 @@ instance_metadata = Metadata(
     })
 )
 
-# volume
-# volume = template.add_resource(
-#     ec2.Volume('DevVolume',
-#                AvailabilityZone='eu-west-1a',
-#                Size='20',
-#                VolumeType='gp2',
-#                Tags=Tags(
-#                    StackName=Ref('AWS::StackName'),
-#                    Name='dev-server-volume',
-#                )
-#                )
-# )
-
 # ec2 instance
 ec2_instance = template.add_resource(ec2.Instance(
     'DevServer',
@@ -116,9 +103,14 @@ ec2_instance = template.add_resource(ec2.Instance(
     Monitoring=True,
     KeyName='nicor88-dev',
     Metadata=instance_metadata,
-    # Volumes=[
-    #     ec2.MountPoint(VolumeId=Ref(volume), Device='/dev/sdb')
-    # ],
+    BlockDeviceMappings=[{
+        'DeviceName': '/dev/xvda',  # "/dev/sda1" if the ami is ubuntu
+        'Ebs': {
+            'VolumeType': 'gp2',
+            'DeleteOnTermination': 'true',
+            'VolumeSize': '25'
+        }
+    }],
     UserData=Base64(
         Join(
             '',

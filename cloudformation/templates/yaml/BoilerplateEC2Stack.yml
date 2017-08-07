@@ -62,6 +62,12 @@ Resources:
                 - /etc/cfn/cfn-hup.conf
                 - /etc/cfn/hooks.d/cfn-auto-reloader.conf
     Properties:
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvda
+        Ebs:
+          DeleteOnTermination: 'true'
+          VolumeSize: '25'
+          VolumeType: gp2
       ImageId: ami-d7b9a2b1
       InstanceInitiatedShutdownBehavior: stop
       InstanceType: t2.micro
