@@ -2,6 +2,21 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "Collection of Lambda Function",
     "Outputs": {
+        "HelloWorldLambda": {
+            "Description": "HelloWorld Lambda Function",
+            "Value": {
+                "Ref": "HelloWorldFunction"
+            }
+        },
+        "HelloWorldLambdaArn": {
+            "Description": "HelloWorld Arn of Lambda Function",
+            "Value": {
+                "Fn::GetAtt": [
+                    "HelloWorldFunction",
+                    "Arn"
+                ]
+            }
+        },
         "LambdaExecutionRole": {
             "Description": "Lambdas Execution role",
             "Value": {

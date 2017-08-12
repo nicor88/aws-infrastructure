@@ -73,7 +73,16 @@ hello_world_lambda = template.add_resource(
 template.add_output([
     Output('LambdaExecutionRole',
            Description='Lambdas Execution role',
-           Value=Ref(lambda_execution_role))])
+           Value=Ref(lambda_execution_role)),
+    
+    Output('HelloWorldLambda',
+           Description='HelloWorld Lambda Function',
+           Value=Ref(hello_world_lambda)),
+    Output('HelloWorldLambdaArn',
+           Description='HelloWorld Arn of Lambda Function',
+           Value=GetAtt(hello_world_lambda, 'Arn')),
+
+])
 
 template_json = template.to_json(indent=4)
 # print(template_json)
