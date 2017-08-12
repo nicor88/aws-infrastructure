@@ -1,16 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: All needed resources to have a lambda function
+Description: Collection of Lambda Function
 Outputs:
   LambdaExecutionRole:
     Description: Lambdas Execution role
     Value: !Ref 'ExecutionRole'
 Resources:
-  AccessLambda:
+  AccessLambdaHelloWorld:
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: hello_world
+      FunctionName: HelloWorld
       Principal: events.amazonaws.com
-      SourceArn: !GetAtt [ScheduledRule, Arn]
+      SourceArn: !GetAtt [ScheduledRuleHelloWorld, Arn]
     Type: AWS::Lambda::Permission
   ExecutionRole:
     Properties:
@@ -51,9 +51,9 @@ Resources:
       Runtime: python3.6
       Timeout: '30'
     Type: AWS::Lambda::Function
-  ScheduledRule:
+  ScheduledRuleHelloWorld:
     Properties:
-      Description: Scheduled Event for Lambda
+      Description: Scheduled Event for Lambda HelloWorld
       ScheduleExpression: cron(0/5 * * * ? *)
       State: ENABLED
       Targets:
