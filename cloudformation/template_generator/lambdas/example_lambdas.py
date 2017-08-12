@@ -7,7 +7,7 @@ from troposphere import Template, Output, Ref, GetAtt
 
 import cloudformation.utils as utils
 
-STACK_NAME = 'ExamplesLambdaStack'
+STACK_NAME = 'ExampleLambdasStack'
 
 template = Template()
 description = 'Collection of Lambda Function'
