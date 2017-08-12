@@ -50,7 +50,7 @@ lambda_execution_role = template.add_resource(
 hello_world_lambda = template.add_resource(
     awslambda.Function(
         'HelloWorldFunction',
-        FunctionName='HelloWorld',
+        FunctionName='hello_world',
         Description='Hello world lambdas with Python 3.6',
         Handler='lambda_function.lambda_handler',
         Role=GetAtt('ExecutionRole', 'Arn'),
@@ -65,7 +65,7 @@ hello_world_lambda = template.add_resource(
 )
 
 utils.add_lambda_scheduler(template_res=template,
-                           lambda_function_name='HelloWorld',
+                           lambda_function_name='hello_world',
                            lambda_function_arn=GetAtt(hello_world_lambda, 'Arn'),
                            cron='cron(0/5 * * * ? *)'
                            )
