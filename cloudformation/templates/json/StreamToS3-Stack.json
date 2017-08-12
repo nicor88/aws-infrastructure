@@ -172,7 +172,9 @@
                         "Arn"
                     ]
                 },
-                "FunctionName": "link_kinesis_stream_to_firehose",
+                "FunctionName": {
+                    "Ref": "KinesisStreamToFirehose"
+                },
                 "StartingPosition": "TRIM_HORIZON"
             },
             "Type": "AWS::Lambda::EventSourceMapping"

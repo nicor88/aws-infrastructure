@@ -95,7 +95,7 @@ Resources:
       BatchSize: 100
       Enabled: true
       EventSourceArn: !GetAtt [DevStream, Arn]
-      FunctionName: link_kinesis_stream_to_firehose
+      FunctionName: !Ref 'KinesisStreamToFirehose'
       StartingPosition: TRIM_HORIZON
     Type: AWS::Lambda::EventSourceMapping
   KinesisStreamToFirehose:
