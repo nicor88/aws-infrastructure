@@ -1,6 +1,11 @@
 import cfn_flip
 import logging
 import boto3
+
+from troposphere.events import Rule, Target
+from troposphere import awslambda
+from troposphere import Template, Output, Ref, GetAtt
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -34,3 +39,28 @@ def get_stack_resources(*, stack_name):
     resources = {o['OutputKey']: o['OutputValue'] for o in outputs}
     return resources
 
+
+def add_lambda_scheduler(*, template_res, cron, lambda_function_name, lambda_function_arn):
+    event_target = Target(
+        f'{lambda_function_name}EventTarget',
+        Arn=lambda_function_arn,
+        Id=f'{lambda_function_name}FunctionEventTarget'
+    )
+    scheduler = template_res.add_resource(
+        Rule(
+            f'ScheduledRule{lambda_function_name}',
+            ScheduleExpression=cron,
+            # http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
+            Description=f'Scheduled Event for Lambda {lambda_function_name}',
+            State="ENABLED",
+            Targets=[event_target]
+        ))
+    add_permission = template_res.add_resource(
+        awslambda.Permission(
+            f'AccessLambda{lambda_function_name}',
+            Action='lambda:InvokeFunction',
+            FunctionName=f'{lambda_function_name}',
+            Principal='events.amazonaws.com',
+            SourceArn=GetAtt(scheduler, 'Arn')
+        )
+    )

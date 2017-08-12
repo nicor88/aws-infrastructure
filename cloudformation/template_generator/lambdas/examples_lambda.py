@@ -3,14 +3,14 @@ import boto3
 from troposphere import awslambda, iam
 from awacs.aws import Statement, Allow, Action
 from troposphere import Template, Output, Ref, GetAtt
-from troposphere.events import Rule, Target
+
 
 import cloudformation.utils as utils
 
-STACK_NAME = 'HelloWorldLambdaStack'
+STACK_NAME = 'ExamplesLambdaStack'
 
 template = Template()
-description = 'All needed resources to have a lambda function'
+description = 'Collection of Lambda Function'
 template.add_description(description)
 template.add_version('2010-09-09')
 
@@ -64,34 +64,11 @@ hello_world_lambda = template.add_resource(
     )
 )
 
-hello_world_event_target = Target(
-    "HelloWorldEventTarget",
-    Arn=GetAtt(hello_world_lambda, 'Arn'),
-    Id="HelloWorldFunctionEventTarget"
-)
-
-hello_world_scheduler = template.add_resource(
-    Rule(
-        'ScheduledRule',
-        ScheduleExpression='cron(0/5 * * * ? *)', # every 5 minutes
-        # http://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html
-        Description="Scheduled Event for Lambda",
-        State="ENABLED",
-        Targets=[hello_world_event_target]
-    ))
-
-add_permission = template.add_resource(
-    awslambda.Permission(
-        'AccessLambda',
-        Action='lambda:InvokeFunction',
-        FunctionName='hello_world',
-        Principal='events.amazonaws.com',
-        SourceArn=GetAtt('ScheduledRule', 'Arn')
-    )
-)
-
-
-
+utils.add_lambda_scheduler(template_res=template,
+                           lambda_function_name='HelloWorld',
+                           lambda_function_arn=GetAtt(hello_world_lambda, 'Arn'),
+                           cron='cron(0/5 * * * ? *)'
+                           )
 
 template.add_output([
     Output('LambdaExecutionRole',
@@ -99,7 +76,7 @@ template.add_output([
            Value=Ref(lambda_execution_role))])
 
 template_json = template.to_json(indent=4)
-print(template_json)
+# print(template_json)
 
 stack_args = {
     'StackName': STACK_NAME,
