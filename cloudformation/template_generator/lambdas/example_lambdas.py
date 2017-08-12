@@ -64,11 +64,11 @@ hello_world_lambda = template.add_resource(
     )
 )
 
-utils.add_lambda_scheduler(template_res=template,
-                           lambda_function_name='hello_world',
-                           lambda_function_arn=GetAtt(hello_world_lambda, 'Arn'),
-                           cron='cron(0/5 * * * ? *)'
-                           )
+# utils.add_lambda_scheduler(template_res=template,
+#                            lambda_function_name='hello_world',
+#                            lambda_function_arn=GetAtt(hello_world_lambda, 'Arn'),
+#                            cron='cron(0/5 * * * ? *)'
+#                            )
 
 template.add_output([
     Output('LambdaExecutionRole',

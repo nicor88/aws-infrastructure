@@ -10,20 +10,6 @@
         }
     },
     "Resources": {
-        "AccessLambdaHelloWorld": {
-            "Properties": {
-                "Action": "lambda:InvokeFunction",
-                "FunctionName": "hello_world",
-                "Principal": "events.amazonaws.com",
-                "SourceArn": {
-                    "Fn::GetAtt": [
-                        "ScheduledRuleHelloWorld",
-                        "Arn"
-                    ]
-                }
-            },
-            "Type": "AWS::Lambda::Permission"
-        },
         "ExecutionRole": {
             "Properties": {
                 "AssumeRolePolicyDocument": {
@@ -88,25 +74,6 @@
                 "Timeout": "30"
             },
             "Type": "AWS::Lambda::Function"
-        },
-        "ScheduledRuleHelloWorld": {
-            "Properties": {
-                "Description": "Scheduled Event for Lambda hello_world",
-                "ScheduleExpression": "cron(0/5 * * * ? *)",
-                "State": "ENABLED",
-                "Targets": [
-                    {
-                        "Arn": {
-                            "Fn::GetAtt": [
-                                "HelloWorldFunction",
-                                "Arn"
-                            ]
-                        },
-                        "Id": "HelloWorldFunctionEventTarget"
-                    }
-                ]
-            },
-            "Type": "AWS::Events::Rule"
         }
     }
 }
