@@ -167,7 +167,7 @@ stack_args = {
     'Tags': [
         {
             'Key': 'Purpose',
-            'Value': 'BoilerplateTemplate'
+            'Value': 'Redshift'
         }
     ],
     'Capabilities': [
