@@ -41,7 +41,7 @@ access_policy = Policy(
 
 elasticsearch_domain = template.add_resource(
     Domain('ElasticsearchDomain',
-           DomainName='nicor88',
+           DomainName='nicor88-dev',
            AccessPolicies=access_policy,
            ElasticsearchVersion='5.3',
            ElasticsearchClusterConfig=ElasticsearchClusterConfig(
