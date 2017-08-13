@@ -4,9 +4,12 @@ import ruamel_yaml as yaml
 import os
 
 from troposphere import GetAtt, Join, Output, Parameter, Ref, Tags, Template
+from troposphere import iam
+from awacs import s3 as s3_doc
+from awacs.aws import Statement, Allow, Policy, Action
 import troposphere.redshift as redshift
 
-from troposphere.constants import SUBNET_ID
+from troposphere.constants import AVAILABILITY_ZONE_NAME, SUBNET_ID
 
 import cloudformation.utils as utils
 
@@ -53,30 +56,82 @@ security_group = template.add_parameter(
     )
 )
 
-# TODO add a IAM role to access S3
+policy_doc = Policy(
+    Statement=[
+        Statement(
+            Sid='ReadAccessS3',
+            Effect=Allow,
+            Action=[Action('s3', 'List*'),
+                    Action('s3', 'Get*')
+                    ],
+            Resource=[
+                s3_doc.ARN('nicor-data'),
+                s3_doc.ARN('nicor-data/*')
+            ]
+        ),
+    ]
+)
+
+redshift_role = template.add_resource(
+    iam.Role(
+        'RedshiftRole',
+        RoleName='RedshiftRole',
+        AssumeRolePolicyDocument={
+            "Statement": [{
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": [
+                        "redshift.amazonaws.com"
+                    ]
+                },
+                "Action": ["sts:AssumeRole"]
+            }]
+        },
+
+        Policies=[
+            iam.Policy(
+                PolicyName='{}S3Access'.format(STACK_NAME),
+                PolicyDocument=policy_doc,
+            )
+        ]
+    ))
+
+redshift_cluster_subnet_group = template.add_resource(
+    redshift.ClusterSubnetGroup('RedshiftClusterSubnetGroup',
+                                Description='Subnets group for Redshift Cluster',
+                                SubnetIds=[Ref(subnet)])
+)
 
 redshift_cluster = template.add_resource(
     redshift.Cluster('RedshiftCluster',
                      ClusterType='single-node',  # TODO try 'multi-node'
-                     ClusterSubnetGroupName=Ref(subnet),
+                     NodeType='dc1.large',
+                     ClusterSubnetGroupName=Ref(redshift_cluster_subnet_group),
                      VpcSecurityGroupIds=[Ref(security_group)],
+                     PubliclyAccessible=True,
                      DBName='dev',
                      MasterUsername=Ref(master_user),
-                     PubliclyAccessible=True,
                      MasterUserPassword=Ref(master_user_password),
-                     NodeType='dc1.large',
+                     IamRoles=[GetAtt(redshift_role, 'Arn')],
                      DeletionPolicy='Snapshot',
+                     AutomatedSnapshotRetentionPeriod=False  # just for dev mode
                      )
 )
 
 # Outputs
 template.add_output([
+    Output('RedshiftRole',
+           Value=Ref(redshift_role),
+           Description='Redshift IAM Role',
+           ),
     Output('RedshiftCluster',
+           Value=Ref(redshift_cluster),
            Description='Redshift Cluster',
-           Value=Ref(redshift_cluster)),
+           ),
     Output('RedshiftClusterEndpoint',
            Value=Join(':', [GetAtt(redshift_cluster, 'Endpoint.Address'),
                             GetAtt(redshift_cluster, 'Endpoint.Port')]),
+           Description='Redshift Cluster Endpoint',
            )
 ])
 
@@ -110,6 +165,9 @@ stack_args = {
             'Key': 'Purpose',
             'Value': 'BoilerplateTemplate'
         }
+    ],
+    'Capabilities': [
+        'CAPABILITY_NAMED_IAM'
     ]
 }
 
