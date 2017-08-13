@@ -20,7 +20,7 @@ networking_resources = utils.get_stack_resources(stack_name='NetworkingStack')
 STACK_NAME = 'Storage-Redshift-Stack'
 
 template = Template()
-description = 'Description for the stack'
+description = 'Storage Stack containing a Redshift Cluster'
 template.add_description(description)
 template.add_version('2010-09-09')
 
