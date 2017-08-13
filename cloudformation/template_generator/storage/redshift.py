@@ -3,13 +3,13 @@ from pkg_resources import resource_string
 import ruamel_yaml as yaml
 import os
 
-from troposphere import GetAtt, Join, Output, Parameter, Ref, Tags, Template
+from troposphere import GetAtt, Join, Output, Parameter, Ref, Template
 from troposphere import iam
 from awacs import s3 as s3_doc
 from awacs.aws import Statement, Allow, Policy, Action
 import troposphere.redshift as redshift
 
-from troposphere.constants import AVAILABILITY_ZONE_NAME, SUBNET_ID
+from troposphere.constants import SUBNET_ID
 
 import cloudformation.utils as utils
 
@@ -114,7 +114,7 @@ redshift_cluster = template.add_resource(
                      MasterUserPassword=Ref(master_user_password),
                      IamRoles=[GetAtt(redshift_role, 'Arn')],
                      DeletionPolicy='Snapshot',
-                     AutomatedSnapshotRetentionPeriod=False  # just for dev mode
+                     AutomatedSnapshotRetentionPeriod=0  # just for dev mode
                      )
 )
 
@@ -123,6 +123,10 @@ template.add_output([
     Output('RedshiftRole',
            Value=Ref(redshift_role),
            Description='Redshift IAM Role',
+           ),
+    Output('RedshiftRoleArn',
+           Value=GetAtt(redshift_role,'Arn'),
+           Description='Redshift Arn IAM Role',
            ),
     Output('RedshiftCluster',
            Value=Ref(redshift_cluster),
