@@ -41,6 +41,48 @@ template.add_resource(
                                     )
 )
 
+generic_public_subnet_eu_west_1b = template.add_resource(
+    ec2.Subnet(
+        'GenericPublicSubnetEuWest1b',
+        AvailabilityZone='eu-west-1b',
+        CidrBlock='172.31.64.0/24',
+        VpcId=cfg['vpc_id'],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            AZ='eu-west-1b',
+            Name='generic-public-subnet-eu-west-1b'
+        )
+    )
+)
+
+template.add_resource(
+    ec2.SubnetRouteTableAssociation('GenericPublicSubnetEuWest1bRouteTableAssociation',
+                                    RouteTableId=cfg['public_route_table'],
+                                    SubnetId=Ref(generic_public_subnet_eu_west_1b)
+                                    )
+)
+
+generic_public_subnet_eu_west_1c = template.add_resource(
+    ec2.Subnet(
+        'GenericPublicSubnetEuWest1c',
+        AvailabilityZone='eu-west-1c',
+        CidrBlock='172.31.128.0/24',
+        VpcId=cfg['vpc_id'],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            AZ='eu-west-1c',
+            Name='generic-public-subnet-eu-west-1c'
+        )
+    )
+)
+
+template.add_resource(
+    ec2.SubnetRouteTableAssociation('GenericPublicSubnetEuWest1cRouteTableAssociation',
+                                    RouteTableId=cfg['public_route_table'],
+                                    SubnetId=Ref(generic_public_subnet_eu_west_1c)
+                                    )
+)
+
 generic_emr_subnet = template.add_resource(
     ec2.Subnet(
         'GenericEMRSubnet',
@@ -180,6 +222,12 @@ template.add_output([
     Output('GenericEC2Subnet',
            Description='Public Subnet for Generic EC2 Instances',
            Value=Ref(generic_ec2_public_subnet)),
+    Output('GenericPublicSubnetEuWest1b',
+           Description='Public Subnet for Generic Purposes in eu-west-1b',
+           Value=Ref(generic_public_subnet_eu_west_1b)),
+    Output('GenericPublicSubnetEuWest1c',
+           Description='Public Subnet for Generic Purposes in eu-west-1c',
+           Value=Ref(generic_public_subnet_eu_west_1c)),
     Output('GenericEMRSubnet',
            Description='Public Subnet for Generic EMR Cluster',
            Value=Ref(generic_emr_subnet)),
