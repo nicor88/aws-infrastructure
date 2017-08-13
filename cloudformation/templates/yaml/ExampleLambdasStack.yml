@@ -36,6 +36,7 @@ Resources:
             Sid: Logs
           Version: '2012-10-17'
         PolicyName: GrantLogs
+      RoleName: ExecutionRole-ExampleLambdasStack
     Type: AWS::IAM::Role
   HelloWorldFunction:
     Properties:

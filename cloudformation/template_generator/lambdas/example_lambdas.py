@@ -17,6 +17,7 @@ template.add_version('2010-09-09')
 lambda_execution_role = template.add_resource(
     iam.Role(
         'ExecutionRole',
+        RoleName=f'ExecutionRole-{STACK_NAME}',
         Path='/',
         Policies=[
             iam.Policy(
@@ -92,6 +93,7 @@ stack_args = {
     'TemplateBody': template_json,
     'Capabilities': [
         'CAPABILITY_IAM',
+        'CAPABILITY_NAMED_IAM'
     ],
     'Tags': [
         {

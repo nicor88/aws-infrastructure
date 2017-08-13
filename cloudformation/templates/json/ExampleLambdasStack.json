@@ -65,7 +65,8 @@
                         },
                         "PolicyName": "GrantLogs"
                     }
-                ]
+                ],
+                "RoleName": "ExecutionRole-ExampleLambdasStack"
             },
             "Type": "AWS::IAM::Role"
         },
