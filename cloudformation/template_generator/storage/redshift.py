@@ -13,8 +13,6 @@ from troposphere.constants import SUBNET_ID
 
 import cloudformation.utils as utils
 
-# load config
-cfg = yaml.load(resource_string('cloudformation.config', 'boilerplate_config.yml'))
 networking_resources = utils.get_stack_resources(stack_name='NetworkingStack')
 
 STACK_NAME = 'Storage-Redshift-Stack'
