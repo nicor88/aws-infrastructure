@@ -12,7 +12,7 @@ networking_resources = utils.get_stack_resources(stack_name='NetworkingStack')
 STACK_NAME = 'Storage-RDS-Postgres-Stack'
 
 template = Template()
-description = 'Storage Stack containing a RDS Aurora Cluster'
+description = 'Storage Stack containing a RDS Postgres Instance'
 template.add_description(description)
 template.add_version('2010-09-09')
 
@@ -20,7 +20,7 @@ master_user = template.add_parameter(
     Parameter(
         'MasterUser',
         Type='String',
-        Description='Master User for Redshift Cluster',
+        Description='Master User for Postgres Instance',
     )
 )
 
@@ -28,7 +28,7 @@ master_user_password = template.add_parameter(
     Parameter(
         'MasterUserPassword',
         Type='String',
-        Description=' Master User Password for Redshift Cluster',
+        Description=' Master User Password for Postgres Instance',
     )
 )
 
@@ -36,14 +36,14 @@ subnet_az_1 = template.add_parameter(
     Parameter(
         'SubnetAZ1',
         Type=SUBNET_ID,
-        Description='Subnet in AZ 1 to use for Redshift',
+        Description='Subnet in AZ 1 to use for Postgres Instance',
     )
 )
 subnet_az_2 = template.add_parameter(
     Parameter(
         'SubnetAZ2',
         Type=SUBNET_ID,
-        Description='Subnet in AZ 2 to use for Redshift',
+        Description='Subnet in AZ 2 to use for Postgres Instance',
     )
 )
 
@@ -57,7 +57,7 @@ security_group = template.add_parameter(
 
 subnet_group = template.add_resource(
     DBSubnetGroup('SubnetGroup',
-                  DBSubnetGroupDescription='Subnets group for Redshift Cluster',
+                  DBSubnetGroupDescription='Subnets group for Postgres Instance',
                   SubnetIds=[Ref(subnet_az_1), Ref(subnet_az_2)])
 )
 
