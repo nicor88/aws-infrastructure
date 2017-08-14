@@ -26,7 +26,7 @@
         "DevStream": {
             "Properties": {
                 "Name": "DevStream",
-                "ShardCount": "1",
+                "ShardCount": 2,
                 "Tags": [
                     {
                         "Key": "Name",
@@ -175,7 +175,7 @@
                 "FunctionName": {
                     "Ref": "KinesisStreamToFirehose"
                 },
-                "StartingPosition": "TRIM_HORIZON"
+                "StartingPosition": "LATEST"
             },
             "Type": "AWS::Lambda::EventSourceMapping"
         },
@@ -183,15 +183,16 @@
             "Properties": {
                 "Code": {
                     "S3Bucket": "nicor-dev",
-                    "S3Key": "deployments/lambdas/link_kinesis_stream_to_firehose.zip"
+                    "S3Key": "deployments/lambdas/travis_build/deliver_to_firehose.zip"
                 },
                 "Description": "Lambda function to read kinesis stream and put to firehose",
                 "Environment": {
                     "Variables": {
+                        "ADD_NEWLINE": "True",
                         "DELIVERY_STREAM": "DevDeliveryStream"
                     }
                 },
-                "FunctionName": "link_kinesis_stream_to_firehose",
+                "FunctionName": "kinesis_to_firehose",
                 "Handler": "lambda_function.lambda_handler",
                 "MemorySize": 128,
                 "Role": {
