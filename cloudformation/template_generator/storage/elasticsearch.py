@@ -4,7 +4,7 @@ import ruamel_yaml as yaml
 
 from troposphere.elasticsearch import Domain, ElasticsearchClusterConfig, EBSOptions
 from troposphere.elasticsearch import SnapshotOptions
-from awacs.aws import Action, Allow, Condition, Policy, Statement
+from awacs.aws import Action, Allow, Condition, Policy, Statement, AWSPrincipal
 from awacs.aws import IpAddress, StringEquals
 from troposphere import GetAtt, Join, Output, Parameter, Ref, Tags, Template
 
@@ -24,11 +24,12 @@ access_policy = Policy(
     Statement=[
         Statement(
             Sid='FullAccess',
+            Principal=AWSPrincipal('*'),
             Effect=Allow,
             Action=[Action('es', '*'),
                     ],
             Resource=[
-                '*'
+                'arn:aws:es:eu-west-1:749785218022:domain/nicor88-es-dev/*'
             ],
             # Condition=Condition(
             #     IpAddress({
@@ -41,7 +42,7 @@ access_policy = Policy(
 
 elasticsearch_domain = template.add_resource(
     Domain('ElasticsearchDomain',
-           DomainName='nicor88-dev',
+           DomainName='nicor88-es-dev',
            AccessPolicies=access_policy,
            ElasticsearchVersion='5.3',
            ElasticsearchClusterConfig=ElasticsearchClusterConfig(
@@ -51,12 +52,13 @@ elasticsearch_domain = template.add_resource(
            ),
            EBSOptions=EBSOptions(EBSEnabled=True,
                                  VolumeSize='10',
-                                 VolumeType='gp2'  # General Purpose SSD
+                                 VolumeType='gp2',  # General Purpose SSD
+                                 Iops=0
                                  ),
            SnapshotOptions=SnapshotOptions(AutomatedSnapshotStartHour=0),
-           Tags=Tags(
-               Name='nicor88-dev'
-           )
+           AdvancedOptions={
+               'rest.action.multi.allow_explicit_index': 'true'
+           }
            )
 )
 
