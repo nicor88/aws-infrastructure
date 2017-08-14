@@ -55,7 +55,7 @@ elasticsearch_domain = template.add_resource(
                                  ),
            SnapshotOptions=SnapshotOptions(AutomatedSnapshotStartHour=0),
            Tags=Tags(
-               Name='dev-service'
+               Name='nicor88-dev'
            )
            )
 )
