@@ -4,14 +4,14 @@ region: 'eu-west-1'
 s3_destination_bucket: 'nicor-data-stream'
 s3_deployment_bucket: 'nicor-dev'
 
-kinesis_stream_name: 'DevStream'
+kinesis_stream_name: 'DevStreamS3'
 kinesis_shard_count: 2
-kinesis_delivery_stream_name: 'DevDeliveryStream'
+kinesis_delivery_stream_name: 'DevDeliveryStreamS3'
 firehose_interval_secs: 60
 firehose_buffer_mb: 5
 firehose_compression_format: UNCOMPRESSED
 
-lambda_function_name: 'kinesis_to_firehose'
+lambda_function_name: 'kinesis_to_firehose_s3'
 s3_key_lambda: 'deployments/lambdas/travis_build/deliver_to_firehose.zip'
 lambda_batch_size: 100
 lambda_memory_size: 128

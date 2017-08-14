@@ -19,6 +19,7 @@ os.environ["AWS_PROFILE"] = "nicor88-aws-dev"
 kinesis = boto3.client('kinesis', config=Config(connect_timeout=1000))
 # https://github.com/boto/botocore/pull/891
 
+
 # put a single record to the stream
 def put_one_record_to_kinesis(*, stream_name):
     res = kinesis.put_record(StreamName=stream_name,
@@ -59,6 +60,6 @@ def read_records_from_kinesis(*, stream_name):
     return records_from_the_stream
 
 # Examples
-# put_one_record_to_kinesis(stream_name='test_stream')
-# put_many_records_to_kinesis(stream_name='test_stream', records_number=5)
-# read_records_from_kinesis(stream_name='test_stream')
+# put_one_record_to_kinesis(stream_name='DevStream')
+# put_many_records_to_kinesis(stream_name='DevStream', records_number=50)
+# read_records_from_kinesis(stream_name='DevStream')

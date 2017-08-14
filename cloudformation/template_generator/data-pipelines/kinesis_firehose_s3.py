@@ -206,7 +206,7 @@ stack_args = {
 
 cfn = boto3.client('cloudformation')
 cfn.validate_template(TemplateBody=template_json)
-utils.write_template(**stack_args)
+# utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
