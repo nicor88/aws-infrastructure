@@ -1,0 +1,21 @@
+stack_name: 'StreamToElastichsearch-Stack'
+region: 'eu-west-1'
+
+s3_deployment_bucket: 'nicor-dev'
+
+kinesis_stream_name: 'DevStreamES'
+kinesis_shard_count: 2
+kinesis_delivery_stream_name: 'DevDeliveryStreamES'
+firehose_interval_secs: 60
+firehose_buffer_mb: 5
+elastic_search_domain_arn: 'arn:aws:es:eu-west-1:749785218022:domain/nicor88-es-dev'
+s3_backup_bucket: 'nicor-data'
+
+lambda_function_name: 'kinesis_to_firehose_es'
+s3_key_lambda: 'deployments/lambdas/travis_build/deliver_to_firehose.zip'
+lambda_batch_size: 100
+lambda_memory_size: 128
+lambda_timeout: 30
+lambda_enabled: True
+lambda_starting_position: LATEST
+# if multiple lambdas are reading from the stream consider to use LATEST
