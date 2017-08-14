@@ -19,12 +19,6 @@ template.add_description(description)
 # AWSTemplateFormatVersion
 template.add_version('2010-09-09')
 
-s3_dev_bucket = template.add_resource(
-    s3.Bucket('S3DestinationBucket',
-              BucketName=cfg['s3_destination_bucket']
-              )
-)
-
 kinesis_stream = template.add_resource(
     kinesis.Stream('DevStream',
                    Name=cfg['kinesis_stream_name'],

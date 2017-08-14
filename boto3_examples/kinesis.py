@@ -60,6 +60,6 @@ def read_records_from_kinesis(*, stream_name):
     return records_from_the_stream
 
 # Examples
-# put_one_record_to_kinesis(stream_name='DevStream')
-# put_many_records_to_kinesis(stream_name='DevStream', records_number=50)
-# read_records_from_kinesis(stream_name='DevStream')
+# put_one_record_to_kinesis(stream_name='DevStreamS3')
+# put_many_records_to_kinesis(stream_name='DevStreamS3', records_number=50)
+# read_records_from_kinesis(stream_name='DevStreamS3')
