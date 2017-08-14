@@ -68,8 +68,12 @@ template.add_output([
            Description='Elasticsearch Domain',
            Value=Ref(elasticsearch_domain)),
     Output('ElasticsearchDomainEndpoint',
-           Description='ElasticsearchDomainEndpoint',
+           Description='Elasticsearch Domain Endpoint',
            Value=GetAtt(elasticsearch_domain, 'DomainEndpoint')
+           ),
+    Output('ElasticsearchKibana',
+           Description='Elasticsearch Kibana URL',
+           Value=Join('', ['https://', GetAtt(elasticsearch_domain, 'DomainEndpoint'), '/_plugin/kibana/'])
            ),
 ])
 
