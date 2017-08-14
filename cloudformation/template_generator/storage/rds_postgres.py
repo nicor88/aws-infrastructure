@@ -9,7 +9,7 @@ import cloudformation.utils as utils
 
 networking_resources = utils.get_stack_resources(stack_name='NetworkingStack')
 
-STACK_NAME = 'Storage-RDS-Aurora-Stack'
+STACK_NAME = 'Storage-RDS-Postgres-Stack'
 
 template = Template()
 description = 'Storage Stack containing a RDS Aurora Cluster'
