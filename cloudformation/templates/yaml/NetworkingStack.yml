@@ -22,6 +22,9 @@ Outputs:
   JupyterEMRSubnet:
     Description: Public Subnet for Jupyter EMR Cluster
     Value: !Ref 'GenericEMRSubnet'
+  PostgresSecurityGroup:
+    Description: Security group to enable connection to Postgres from Everywhere
+    Value: !Ref 'PostgresSecurityGroup'
   RedshiftSecurityGroup:
     Description: Security group to enable connection to Redshift from Everywhere
     Value: !Ref 'RedshiftSecurityGroup'
@@ -165,6 +168,21 @@ Resources:
       RouteTableId: rtb-1197ed76
       SubnetId: !Ref 'JupyterEMRSubnet'
     Type: AWS::EC2::SubnetRouteTableAssociation
+  PostgresSecurityGroup:
+    Properties:
+      GroupDescription: Postgres Security Group
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: '5432'
+        IpProtocol: tcp
+        ToPort: '5432'
+      Tags:
+      - Key: Name
+        Value: postgres-sg
+      - Key: StackName
+        Value: !Ref 'AWS::StackName'
+      VpcId: vpc-8b708fec
+    Type: AWS::EC2::SecurityGroup
   RedshiftSecurityGroup:
     Properties:
       GroupDescription: Redshift Security Group

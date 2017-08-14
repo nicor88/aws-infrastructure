@@ -148,26 +148,6 @@ all_ssh_security_group = template.add_resource(
     )
 )
 
-redshift_security_group = template.add_resource(
-    ec2.SecurityGroup(
-        'RedshiftSecurityGroup',
-        VpcId=cfg['vpc_id'],
-        GroupDescription='Redshift Security Group',
-        SecurityGroupIngress=[
-            ec2.SecurityGroupRule(
-                IpProtocol='tcp',
-                FromPort='5439',
-                ToPort='5439',
-                CidrIp='0.0.0.0/0'
-            )
-        ],
-        Tags=Tags(
-            StackName=Ref('AWS::StackName'),
-            Name='redshift-sg'
-        )
-    )
-)
-
 master_security_group = template.add_resource(
     ec2.SecurityGroup(
         'EMRMasterSecurityGroup',
@@ -217,6 +197,46 @@ master_security_group = template.add_resource(
     )
 )
 
+postgres_security_group = template.add_resource(
+    ec2.SecurityGroup(
+        'PostgresSecurityGroup',
+        VpcId=cfg['vpc_id'],
+        GroupDescription='Postgres Security Group',
+        SecurityGroupIngress=[
+            ec2.SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='5432',
+                ToPort='5432',
+                CidrIp='0.0.0.0/0'
+            )
+        ],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            Name='postgres-sg'
+        )
+    )
+)
+
+redshift_security_group = template.add_resource(
+    ec2.SecurityGroup(
+        'RedshiftSecurityGroup',
+        VpcId=cfg['vpc_id'],
+        GroupDescription='Redshift Security Group',
+        SecurityGroupIngress=[
+            ec2.SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='5439',
+                ToPort='5439',
+                CidrIp='0.0.0.0/0'
+            )
+        ],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            Name='redshift-sg'
+        )
+    )
+)
+
 # Outputs
 template.add_output([
     Output('GenericEC2Subnet',
@@ -237,6 +257,9 @@ template.add_output([
     Output('AllSshSecurityGroup',
            Description='Security group to enable SSH from Everywhere',
            Value=Ref(all_ssh_security_group)),
+    Output('PostgresSecurityGroup',
+           Description='Security group to enable connection to Postgres from Everywhere',
+           Value=Ref(postgres_security_group)),
     Output('RedshiftSecurityGroup',
            Description='Security group to enable connection to Redshift from Everywhere',
            Value=Ref(redshift_security_group)),
