@@ -93,11 +93,6 @@ kinesis_delivery_stream = template.add_resource(
                             ElasticsearchDestinationConfiguration=
                             firehose.ElasticsearchDestinationConfiguration(
                                 DomainARN=cfg['elastic_search_domain_arn'],
-                                CloudWatchLoggingOptions=firehose.CloudWatchLoggingOptions(
-                                        Enabled=True,
-                                        LogGroupName='firehose-dev',
-                                        LogStreamName='es',
-                                    ),
                                 IndexName='events',
                                 TypeName='event',
                                 IndexRotationPeriod='NoRotation',

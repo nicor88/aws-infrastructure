@@ -8,10 +8,6 @@ Resources:
         BufferingHints:
           IntervalInSeconds: 60
           SizeInMBs: 5
-        CloudWatchLoggingOptions:
-          Enabled: 'true'
-          LogGroupName: firehose-dev
-          LogStreamName: es
         DomainARN: arn:aws:es:eu-west-1:749785218022:domain/nicor88-es-dev
         IndexName: events
         IndexRotationPeriod: NoRotation
