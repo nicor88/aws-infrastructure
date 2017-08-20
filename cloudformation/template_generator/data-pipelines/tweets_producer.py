@@ -11,7 +11,8 @@ from troposphere import Base64, GetAtt, Join, Output, Parameter, Ref, Tags, Temp
 from troposphere.cloudformation import Init, InitFile, InitFiles, InitConfig, InitService, \
     InitServices
 from troposphere.autoscaling import Metadata
-from troposphere.codedeploy import Application, DeploymentGroup, Ec2TagFilters
+from troposphere.codedeploy import Application, Deployment, DeploymentGroup, Ec2TagFilters, \
+    Revision, S3Location
 
 import cloudformation.utils as utils
 
@@ -21,6 +22,8 @@ networking_resources = utils.get_stack_resources(stack_name=cfg['networking_stac
 
 STACK_NAME = cfg['ec2']['stack_name']
 SERVER_NAME = 'TwitterProducer'
+TWITTER_KEYWORDS = 'Sardegna,Vacanze,Mare'
+deployment_commithash = '60254d3137c0e71702a553ebcbb57875781213d8'
 
 template = Template()
 description = 'Twitter Producer Stack'
@@ -63,7 +66,7 @@ instance_policy_doc = Policy(
 
 instance_role = template.add_resource(
     iam.Role(
-        "InstanceRole",
+        'InstanceRole',
         RoleName='TweetProducerRole',
         AssumeRolePolicyDocument={
             "Statement": [{
@@ -87,7 +90,7 @@ instance_role = template.add_resource(
 
 instance_profile = template.add_resource(
     iam.InstanceProfile(
-        "InstanceProfile",
+        'InstanceProfile',
         Roles=[Ref(instance_role)],
         InstanceProfileName='TweeterUploaderInstanceProfile'
     ))
@@ -98,19 +101,10 @@ instance_metadata = Metadata(
         commands={
             'update_yum_packages': {
                 'command': 'yum update -y'
-            },
-            'download_miniconda': {
-                'command': 'su - ec2-user -c "wget http://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh"',
-            },
-            'install_miniconda': {
-                'command': 'su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"',
-            },
-            'remove_installer': {
-                'command': 'rm -rf /home/ec2-user/miniconda.sh',
             }
         },
         files=InitFiles({
-            # setup .bashrc
+            # setup .bashrc ec2-user
             '/home/ec2-user/.bashrc': InitFile(
                 content=Join('', [
                     'export PATH="/home/ec2-user/miniconda/bin:$PATH"\n'
@@ -118,10 +112,11 @@ instance_metadata = Metadata(
                 owner='ec2-user',
                 mode='000400',
                 group='ec2-user'),
+            # setup .bashrc root
             '/root/.bashrc': InitFile(
                 content=Join('', [
                     'export PATH="/home/ec2-user/miniconda/bin:$PATH"\n'
-                    'export TWITTER_KEYWORDS="Sardegna,Python"\n'
+                    f'export TWITTER_KEYWORDS="{TWITTER_KEYWORDS}"\n'
                     'export ENV="production"\n'
                 ]),
                 owner='root',
@@ -196,7 +191,24 @@ ec2_instance = template.add_resource(ec2.Instance(
             '',
             ['#!/bin/bash -xe\n',
 
+             'yum update -y\n'
              'yum install -y gcc\n',
+
+             # install conda
+             'su - ec2-user -c "wget '
+             'http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh'
+             ' -O /home/ec2-user/miniconda.sh"\n',
+             'su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"\n'
+             'rm -rf /home/ec2-user/miniconda.sh\n'
+
+             # install code deploy
+             'wget https://aws-codedeploy-eu-west-1.s3.amazonaws.com/latest/install'
+             ' -O /root/codedeploy_installer\n',
+             'chmod +x /root/codedeploy_installer\n',
+             'cd /root\n',
+             './codedeploy_installer auto\n',
+             'service codedeploy-agent start\n',
+             'rm -rf /root/codedeploy_installer\n',
 
              # cfn-init: install what is specified in the metadata section
              '/opt/aws/bin/cfn-init -v ',
@@ -227,7 +239,7 @@ ec2_instance = template.add_resource(ec2.Instance(
 
 code_deploy_service_role = template.add_resource(
     iam.Role(
-        "CodeDeployServiceRole",
+        'CodeDeployServiceRole',
         AssumeRolePolicyDocument={
             "Statement": [{
                 "Effect": "Allow",
@@ -247,8 +259,24 @@ code_deploy_service_role = template.add_resource(
                         Statement(
                             Sid='EC2Access',
                             Effect=Allow,
-                            Action=[Action('ec2', '*')
-                                    ],
+                            Action=[
+                                Action('ec2', '*'),
+                            ],
+                            Resource=[
+                                '*',
+                            ]
+                        ),
+                        Statement(
+                            Sid='AutoscalingAccess',
+                            Effect=Allow,
+                            Action=[
+                                Action('autoscaling', 'CompleteLifecycleAction'),
+                                Action('autoscaling', 'DescribeAutoScalingGroups'),
+                                Action('autoscaling', 'DescribeLifecycleHooks'),
+                                Action('autoscaling', 'DeleteLifecycleHook'),
+                                Action('autoscaling', 'PutLifecycleHook'),
+                                Action('autoscaling', 'RecordLifecycleActionHeartbeat'),
+                            ],
                             Resource=[
                                 '*',
                             ]
@@ -278,18 +306,45 @@ deployment_group = template.add_resource(
                           )],
         DeploymentGroupName='TwitterProducer',
         ServiceRoleArn=GetAtt(code_deploy_service_role, 'Arn'),
-        DeploymentConfigName='CodeDeployDefault.HalfAtATime',
+        DeploymentConfigName='CodeDeployDefault.OneAtATime',
+        Deployment=Deployment(
+            Description='First automated deployment',
+            Revision=Revision(
+                RevisionType='S3',
+                S3Location=S3Location(
+                    Bucket='nicor-dev',
+                    Key=f'deployments/apps/twitter-to-kinesis/{deployment_commithash}.zip',
+                    BundleType='zip'
+                ))
+        )
     )
 )
 
 # outputs
 template.add_output([
-    Output('TwitterProducer',
+    Output('TwitterProducerEC2',
            Description='EC2 Instance',
            Value=Ref(ec2_instance)),
+
     Output('TwitterProducerPublicDnsName',
-           Description='PublicIP of EC2 Instance',
-           Value=GetAtt(ec2_instance, 'PublicDnsName'))
+           Description='Public Dns Name of EC2 Instance',
+           Value=GetAtt(ec2_instance, 'PublicDnsName')),
+
+    Output('TwitterProducerPublicIp',
+           Description='Public IP of EC2 Instance',
+           Value=GetAtt(ec2_instance, 'PublicIp')),
+
+    Output('TwitterProducerPrivateDnsName',
+           Description='Private Dns Name of EC2 Instance',
+           Value=GetAtt(ec2_instance, 'PrivateDnsName')),
+
+    Output('TwitterProducerPrivateIp',
+           Description='Private IP of EC2 Instance',
+           Value=GetAtt(ec2_instance, 'PrivateIp')),
+
+    Output('TwitterProducerAvailabilityZone',
+           Description='AvailabilityZone of EC2 Instance',
+           Value=GetAtt(ec2_instance, 'AvailabilityZone'))
 ])
 
 template_json = template.to_json(indent=4)
@@ -312,11 +367,11 @@ stack_args = {
 
 cfn = boto3.client('cloudformation')
 cfn.validate_template(TemplateBody=template_json)
-utils.write_template(**stack_args)
+# utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)
 # cfn.delete_stack(StackName=STACK_NAME)
 
-# code deploy path
-# s3://nicor-dev/deployments/apps/twitter-to-kinesis/2296c9aa26db8ee6225beceaab474c7968a9c68c.zip
+# code deploy path, just for manual steps
+print(f's3://nicor-dev/deployments/apps/twitter-to-kinesis/{deployment_commithash}.zip')
