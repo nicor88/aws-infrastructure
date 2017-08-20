@@ -22,8 +22,9 @@ networking_resources = utils.get_stack_resources(stack_name=cfg['networking_stac
 
 STACK_NAME = cfg['ec2']['stack_name']
 SERVER_NAME = 'TwitterProducer'
+STREAM_NAME = 'DevStreamES'
 TWITTER_KEYWORDS = 'Sardegna,Vacanze,Mare'
-deployment_commithash = '60254d3137c0e71702a553ebcbb57875781213d8'
+deployment_commithash = 'efe8fb1515dd86c23bc7656d7ced9b19e639a756'
 
 template = Template()
 description = 'Twitter Producer Stack'
@@ -116,7 +117,9 @@ instance_metadata = Metadata(
             '/root/.bashrc': InitFile(
                 content=Join('', [
                     'export PATH="/home/ec2-user/miniconda/bin:$PATH"\n'
-                    f'export TWITTER_KEYWORDS="{TWITTER_KEYWORDS}"\n'
+                    f'export STREAM_NAME="{STREAM_NAME}"\n',
+                    f'export PRODUCER_NAME="{SERVER_NAME}"\n',
+                    f'export TWITTER_KEYWORDS="{TWITTER_KEYWORDS}"\n',
                     'export ENV="production"\n'
                 ]),
                 owner='root',
