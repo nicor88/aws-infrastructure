@@ -290,6 +290,7 @@ code_deploy_service_role = template.add_resource(
 # Code Deploy Setup
 code_deploy_application = template.add_resource(
     Application('TwitterProducerCodeDeployApplication',
+                DependsOn=f'{SERVER_NAME}',
                 ApplicationName='TwitterProducer'
                 )
 )
@@ -297,6 +298,7 @@ code_deploy_application = template.add_resource(
 deployment_group = template.add_resource(
     DeploymentGroup(
         'DeploymentGroup',
+        DependsOn=[f'{SERVER_NAME}', 'TwitterProducerCodeDeployApplication'],
         ApplicationName=Ref(code_deploy_application),
         Ec2TagFilters=[
             Ec2TagFilters('TwitterProducerEc2Filter',
