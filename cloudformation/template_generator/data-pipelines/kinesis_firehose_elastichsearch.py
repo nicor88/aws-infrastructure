@@ -205,6 +205,33 @@ add_kinesis_trigger_for_lambda = template.add_resource(
                                  )
 )
 
+
+# outputs
+template.add_output([
+    Output('KinesisStream',
+           Description='Kinesis Stream',
+           Value=Ref(kinesis_stream)),
+
+    Output('FirehoseDeliveryStream',
+           Description='Firehose Delivery Stream',
+           Value=Ref(kinesis_delivery_stream)),
+
+    Output('FirehoseRole',
+           Description='Firehose Role',
+           Value=Ref(firehose_delivery_role)),
+
+    Output('LambdaExecutionRole',
+           Description='Lambda execution role',
+           Value=Ref(lambda_execution_role)),
+    Output('LambdaKinesisStreamToFirehose',
+           Description='Lambda function to receive Kinesis events and push to Firehose',
+           Value=Ref(lambda_stream_to_firehose)),
+    Output('KinesisLambdaTrigger',
+           Description='Trigger to invoke a lambda from a Kinesis Stream',
+           Value=Ref(add_kinesis_trigger_for_lambda)),
+
+])
+
 template_json = template.to_json(indent=4)
 print(template_json)
 

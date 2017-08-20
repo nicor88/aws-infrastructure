@@ -1,5 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Stack containing kinesis and firehose writing to Elasticsearch
+Outputs:
+  FirehoseDeliveryStream:
+    Description: Firehose Delivery Stream
+    Value: !Ref 'DeliveryStream'
+  FirehoseRole:
+    Description: Firehose Role
+    Value: !Ref 'FirehoseRole'
+  KinesisLambdaTrigger:
+    Description: Trigger to invoke a lambda from a Kinesis Stream
+    Value: !Ref 'KinesisLambdaTrigger'
+  KinesisStream:
+    Description: Kinesis Stream
+    Value: !Ref 'DevStream'
+  LambdaExecutionRole:
+    Description: Lambda execution role
+    Value: !Ref 'ExecutionRole'
+  LambdaKinesisStreamToFirehose:
+    Description: Lambda function to receive Kinesis events and push to Firehose
+    Value: !Ref 'KinesisStreamToFirehose'
 Resources:
   DeliveryStream:
     Properties:
