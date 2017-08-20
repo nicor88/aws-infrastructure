@@ -21,10 +21,10 @@ cfg = yaml.load(resource_string('cloudformation.config', 'twitter_producer_confi
 networking_resources = utils.get_stack_resources(stack_name=cfg['networking_stack_name'])
 
 STACK_NAME = cfg['ec2']['stack_name']
-SERVER_NAME = 'TwitterProducer'
-STREAM_NAME = 'DevStreamES'
-TWITTER_KEYWORDS = 'Sardegna,Vacanze,Mare'
-deployment_commithash = 'efe8fb1515dd86c23bc7656d7ced9b19e639a756'
+SERVER_NAME = cfg['ec2']['server_name']
+STREAM_NAME = cfg['ec2']['stream_name']
+TWITTER_KEYWORDS = cfg['ec2']['twitter_keywords']
+deployment_commithash = '8aebd8fc0c3b62da8bf881b8678467492801022d'
 
 template = Template()
 description = 'Twitter Producer Stack'
