@@ -1,0 +1,10 @@
+region: 'eu-west-1'
+ec2:
+  stack_name: 'TwitterProducerEC2Stack'
+  instance_type: 't2.micro'
+  ami_version: 'ami-d7b9a2b1'
+  server_name: 'TwitterProducer'
+  stream_name: 'DevStreamES'
+  twitter_keywords: 'Sardegna,Vacanze,Mare'
+
+networking_stack_name: NetworkingStack

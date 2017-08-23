@@ -1,17 +1,17 @@
-stack_name: 'StreamToS3-Stack'
+stack_name: 'StreamToElastichsearch-Stack'
 region: 'eu-west-1'
 
-s3_destination_bucket: 'nicor-data'
 s3_deployment_bucket: 'nicor-dev'
 
-kinesis_stream_name: 'DevStreamS3'
+kinesis_stream_name: 'DevStreamES'
 kinesis_shard_count: 2
-kinesis_delivery_stream_name: 'DevDeliveryStreamS3'
+kinesis_delivery_stream_name: 'DevDeliveryStreamES'
 firehose_interval_secs: 60
 firehose_buffer_mb: 5
-firehose_compression_format: UNCOMPRESSED
+elastic_search_domain_arn: 'arn:aws:es:eu-west-1:749785218022:domain/nicor88-es-dev'
+s3_backup_bucket: 'nicor-data'
 
-lambda_function_name: 'kinesis_to_firehose_s3'
+lambda_function_name: 'kinesis_to_firehose_es'
 s3_key_lambda: 'deployments/lambdas/travis_build/deliver_to_firehose.zip'
 lambda_batch_size: 100
 lambda_memory_size: 128

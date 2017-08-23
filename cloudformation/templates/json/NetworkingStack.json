@@ -26,10 +26,34 @@
                 "Ref": "GenericEMRSubnet"
             }
         },
+        "GenericPublicSubnetEuWest1b": {
+            "Description": "Public Subnet for Generic Purposes in eu-west-1b",
+            "Value": {
+                "Ref": "GenericPublicSubnetEuWest1b"
+            }
+        },
+        "GenericPublicSubnetEuWest1c": {
+            "Description": "Public Subnet for Generic Purposes in eu-west-1c",
+            "Value": {
+                "Ref": "GenericPublicSubnetEuWest1c"
+            }
+        },
         "JupyterEMRSubnet": {
             "Description": "Public Subnet for Jupyter EMR Cluster",
             "Value": {
                 "Ref": "GenericEMRSubnet"
+            }
+        },
+        "PostgresSecurityGroup": {
+            "Description": "Security group to enable connection to Postgres from Everywhere",
+            "Value": {
+                "Ref": "PostgresSecurityGroup"
+            }
+        },
+        "RedshiftSecurityGroup": {
+            "Description": "Security group to enable connection to Redshift from Everywhere",
+            "Value": {
+                "Ref": "RedshiftSecurityGroup"
             }
         }
     },
@@ -180,6 +204,72 @@
             },
             "Type": "AWS::EC2::SubnetRouteTableAssociation"
         },
+        "GenericPublicSubnetEuWest1b": {
+            "Properties": {
+                "AvailabilityZone": "eu-west-1b",
+                "CidrBlock": "172.31.64.0/24",
+                "Tags": [
+                    {
+                        "Key": "AZ",
+                        "Value": "eu-west-1b"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "generic-public-subnet-eu-west-1b"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": "vpc-8b708fec"
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "GenericPublicSubnetEuWest1bRouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": "rtb-1197ed76",
+                "SubnetId": {
+                    "Ref": "GenericPublicSubnetEuWest1b"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "GenericPublicSubnetEuWest1c": {
+            "Properties": {
+                "AvailabilityZone": "eu-west-1c",
+                "CidrBlock": "172.31.128.0/24",
+                "Tags": [
+                    {
+                        "Key": "AZ",
+                        "Value": "eu-west-1c"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "generic-public-subnet-eu-west-1c"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": "vpc-8b708fec"
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "GenericPublicSubnetEuWest1cRouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": "rtb-1197ed76",
+                "SubnetId": {
+                    "Ref": "GenericPublicSubnetEuWest1c"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
         "JupyterEMRSubnet": {
             "Properties": {
                 "AvailabilityZone": "eu-west-1a",
@@ -213,6 +303,60 @@
                 }
             },
             "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "PostgresSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Postgres Security Group",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "5432",
+                        "IpProtocol": "tcp",
+                        "ToPort": "5432"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "postgres-sg"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": "vpc-8b708fec"
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "RedshiftSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Redshift Security Group",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "5439",
+                        "IpProtocol": "tcp",
+                        "ToPort": "5439"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "redshift-sg"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": "vpc-8b708fec"
+            },
+            "Type": "AWS::EC2::SecurityGroup"
         }
     }
 }

@@ -41,6 +41,48 @@ template.add_resource(
                                     )
 )
 
+generic_public_subnet_eu_west_1b = template.add_resource(
+    ec2.Subnet(
+        'GenericPublicSubnetEuWest1b',
+        AvailabilityZone='eu-west-1b',
+        CidrBlock='172.31.64.0/24',
+        VpcId=cfg['vpc_id'],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            AZ='eu-west-1b',
+            Name='generic-public-subnet-eu-west-1b'
+        )
+    )
+)
+
+template.add_resource(
+    ec2.SubnetRouteTableAssociation('GenericPublicSubnetEuWest1bRouteTableAssociation',
+                                    RouteTableId=cfg['public_route_table'],
+                                    SubnetId=Ref(generic_public_subnet_eu_west_1b)
+                                    )
+)
+
+generic_public_subnet_eu_west_1c = template.add_resource(
+    ec2.Subnet(
+        'GenericPublicSubnetEuWest1c',
+        AvailabilityZone='eu-west-1c',
+        CidrBlock='172.31.128.0/24',
+        VpcId=cfg['vpc_id'],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            AZ='eu-west-1c',
+            Name='generic-public-subnet-eu-west-1c'
+        )
+    )
+)
+
+template.add_resource(
+    ec2.SubnetRouteTableAssociation('GenericPublicSubnetEuWest1cRouteTableAssociation',
+                                    RouteTableId=cfg['public_route_table'],
+                                    SubnetId=Ref(generic_public_subnet_eu_west_1c)
+                                    )
+)
+
 generic_emr_subnet = template.add_resource(
     ec2.Subnet(
         'GenericEMRSubnet',
@@ -155,11 +197,57 @@ master_security_group = template.add_resource(
     )
 )
 
+postgres_security_group = template.add_resource(
+    ec2.SecurityGroup(
+        'PostgresSecurityGroup',
+        VpcId=cfg['vpc_id'],
+        GroupDescription='Postgres Security Group',
+        SecurityGroupIngress=[
+            ec2.SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='5432',
+                ToPort='5432',
+                CidrIp='0.0.0.0/0'
+            )
+        ],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            Name='postgres-sg'
+        )
+    )
+)
+
+redshift_security_group = template.add_resource(
+    ec2.SecurityGroup(
+        'RedshiftSecurityGroup',
+        VpcId=cfg['vpc_id'],
+        GroupDescription='Redshift Security Group',
+        SecurityGroupIngress=[
+            ec2.SecurityGroupRule(
+                IpProtocol='tcp',
+                FromPort='5439',
+                ToPort='5439',
+                CidrIp='0.0.0.0/0'
+            )
+        ],
+        Tags=Tags(
+            StackName=Ref('AWS::StackName'),
+            Name='redshift-sg'
+        )
+    )
+)
+
 # Outputs
 template.add_output([
     Output('GenericEC2Subnet',
            Description='Public Subnet for Generic EC2 Instances',
            Value=Ref(generic_ec2_public_subnet)),
+    Output('GenericPublicSubnetEuWest1b',
+           Description='Public Subnet for Generic Purposes in eu-west-1b',
+           Value=Ref(generic_public_subnet_eu_west_1b)),
+    Output('GenericPublicSubnetEuWest1c',
+           Description='Public Subnet for Generic Purposes in eu-west-1c',
+           Value=Ref(generic_public_subnet_eu_west_1c)),
     Output('GenericEMRSubnet',
            Description='Public Subnet for Generic EMR Cluster',
            Value=Ref(generic_emr_subnet)),
@@ -169,6 +257,12 @@ template.add_output([
     Output('AllSshSecurityGroup',
            Description='Security group to enable SSH from Everywhere',
            Value=Ref(all_ssh_security_group)),
+    Output('PostgresSecurityGroup',
+           Description='Security group to enable connection to Postgres from Everywhere',
+           Value=Ref(postgres_security_group)),
+    Output('RedshiftSecurityGroup',
+           Description='Security group to enable connection to Redshift from Everywhere',
+           Value=Ref(redshift_security_group)),
     Output('EMRMasterSecurityGroup',
            Description='Security group to enable some app ports for Master Node',
            Value=Ref(master_security_group)),

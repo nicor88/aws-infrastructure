@@ -19,16 +19,10 @@ template.add_description(description)
 # AWSTemplateFormatVersion
 template.add_version('2010-09-09')
 
-s3_dev_bucket = template.add_resource(
-    s3.Bucket('S3DestinationBucket',
-              BucketName=cfg['s3_destination_bucket']
-              )
-)
-
 kinesis_stream = template.add_resource(
     kinesis.Stream('DevStream',
                    Name=cfg['kinesis_stream_name'],
-                   ShardCount='1',
+                   ShardCount=cfg['kinesis_shard_count'],
                    Tags=Tags(
                        StackName=Ref('AWS::StackName'),
                        Name='DevStream'
@@ -165,14 +159,15 @@ lambda_stream_to_firehose = template.add_resource(
         Role=GetAtt('ExecutionRole', 'Arn'),
         Code=awslambda.Code(
             S3Bucket=cfg['s3_deployment_bucket'],
-            S3Key=cfg['s3_key_lambda_stream_to_firehose'],
+            S3Key=cfg['s3_key_lambda'],
         ),
         Runtime='python3.6',
         Timeout=cfg['lambda_timeout'],
         MemorySize=cfg['lambda_memory_size'],
         Environment=awslambda.Environment('LambdaVars',
                                           Variables=
-                                          {'DELIVERY_STREAM': cfg['kinesis_delivery_stream_name']})
+                                          {'DELIVERY_STREAM': cfg['kinesis_delivery_stream_name'],
+                                           'ADD_NEWLINE': 'True'})
     )
 )
 
@@ -205,7 +200,7 @@ stack_args = {
 
 cfn = boto3.client('cloudformation')
 cfn.validate_template(TemplateBody=template_json)
-utils.write_template(**stack_args)
+# utils.write_template(**stack_args)
 
 # cfn.create_stack(**stack_args)
 # cfn.update_stack(**stack_args)

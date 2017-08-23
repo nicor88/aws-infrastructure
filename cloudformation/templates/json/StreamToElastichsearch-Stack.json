@@ -1,32 +1,90 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Stack containing kinesis and firehose writing to S3",
+    "Description": "Stack containing kinesis and firehose writing to Elasticsearch",
+    "Outputs": {
+        "FirehoseDeliveryStream": {
+            "Description": "Firehose Delivery Stream",
+            "Value": {
+                "Ref": "DeliveryStream"
+            }
+        },
+        "FirehoseRole": {
+            "Description": "Firehose Role",
+            "Value": {
+                "Ref": "FirehoseRole"
+            }
+        },
+        "KinesisLambdaTrigger": {
+            "Description": "Trigger to invoke a lambda from a Kinesis Stream",
+            "Value": {
+                "Ref": "KinesisLambdaTrigger"
+            }
+        },
+        "KinesisStream": {
+            "Description": "Kinesis Stream",
+            "Value": {
+                "Ref": "DevStream"
+            }
+        },
+        "LambdaExecutionRole": {
+            "Description": "Lambda execution role",
+            "Value": {
+                "Ref": "ExecutionRole"
+            }
+        },
+        "LambdaKinesisStreamToFirehose": {
+            "Description": "Lambda function to receive Kinesis events and push to Firehose",
+            "Value": {
+                "Ref": "KinesisStreamToFirehose"
+            }
+        }
+    },
     "Resources": {
         "DeliveryStream": {
             "Properties": {
-                "DeliveryStreamName": "DevDeliveryStream",
-                "S3DestinationConfiguration": {
-                    "BucketARN": "arn:aws:s3:::nicor-data-stream",
+                "DeliveryStreamName": "DevDeliveryStreamES",
+                "ElasticsearchDestinationConfiguration": {
                     "BufferingHints": {
                         "IntervalInSeconds": 60,
                         "SizeInMBs": 5
                     },
-                    "CompressionFormat": "UNCOMPRESSED",
-                    "Prefix": "delivery_stream/",
+                    "DomainARN": "arn:aws:es:eu-west-1:749785218022:domain/nicor88-es-dev",
+                    "IndexName": "events",
+                    "IndexRotationPeriod": "NoRotation",
+                    "RetryOptions": {
+                        "DurationInSeconds": 300
+                    },
                     "RoleARN": {
                         "Fn::GetAtt": [
                             "FirehoseRole",
                             "Arn"
                         ]
-                    }
+                    },
+                    "S3BackupMode": "FailedDocumentsOnly",
+                    "S3Configuration": {
+                        "BucketARN": "arn:aws:s3:::nicor-data",
+                        "BufferingHints": {
+                            "IntervalInSeconds": 60,
+                            "SizeInMBs": 5
+                        },
+                        "CompressionFormat": "UNCOMPRESSED",
+                        "Prefix": "failed_es/",
+                        "RoleARN": {
+                            "Fn::GetAtt": [
+                                "FirehoseRole",
+                                "Arn"
+                            ]
+                        }
+                    },
+                    "TypeName": "event"
                 }
             },
             "Type": "AWS::KinesisFirehose::DeliveryStream"
         },
         "DevStream": {
             "Properties": {
-                "Name": "DevStream",
-                "ShardCount": "1",
+                "Name": "DevStreamES",
+                "ShardCount": 2,
                 "Tags": [
                     {
                         "Key": "Name",
@@ -98,7 +156,7 @@
                                     ],
                                     "Effect": "Allow",
                                     "Resource": [
-                                        "arn:aws:firehose:*:*:deliverystream/DevDeliveryStream"
+                                        "arn:aws:firehose:*:*:deliverystream/DevDeliveryStreamES"
                                     ],
                                     "Sid": "DeliveryStream"
                                 }
@@ -134,12 +192,22 @@
                             "Statement": [
                                 {
                                     "Action": [
+                                        "es:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "arn:aws:es:eu-west-1:749785218022:domain/nicor88-es-dev"
+                                    ],
+                                    "Sid": "ESAccess"
+                                },
+                                {
+                                    "Action": [
                                         "s3:*"
                                     ],
                                     "Effect": "Allow",
                                     "Resource": [
-                                        "arn:aws:s3:::nicor-data-stream",
-                                        "arn:aws:s3:::nicor-data-stream/*"
+                                        "arn:aws:s3:::nicor-data",
+                                        "arn:aws:s3:::nicor-data/*"
                                     ],
                                     "Sid": "S3Access"
                                 },
@@ -156,7 +224,7 @@
                             ],
                             "Version": "2012-10-17"
                         },
-                        "PolicyName": "AccessToS3andLogs"
+                        "PolicyName": "AccessToStorageAndLogs"
                     }
                 ]
             },
@@ -172,8 +240,10 @@
                         "Arn"
                     ]
                 },
-                "FunctionName": "link_kinesis_stream_to_firehose",
-                "StartingPosition": "TRIM_HORIZON"
+                "FunctionName": {
+                    "Ref": "KinesisStreamToFirehose"
+                },
+                "StartingPosition": "LATEST"
             },
             "Type": "AWS::Lambda::EventSourceMapping"
         },
@@ -181,15 +251,16 @@
             "Properties": {
                 "Code": {
                     "S3Bucket": "nicor-dev",
-                    "S3Key": "deployments/lambdas/link_kinesis_stream_to_firehose.zip"
+                    "S3Key": "deployments/lambdas/travis_build/deliver_to_firehose.zip"
                 },
                 "Description": "Lambda function to read kinesis stream and put to firehose",
                 "Environment": {
                     "Variables": {
-                        "DELIVERY_STREAM": "DevDeliveryStream"
+                        "ADD_NEWLINE": "False",
+                        "DELIVERY_STREAM": "DevDeliveryStreamES"
                     }
                 },
-                "FunctionName": "link_kinesis_stream_to_firehose",
+                "FunctionName": "kinesis_to_firehose_es",
                 "Handler": "lambda_function.lambda_handler",
                 "MemorySize": 128,
                 "Role": {
@@ -202,12 +273,6 @@
                 "Timeout": 30
             },
             "Type": "AWS::Lambda::Function"
-        },
-        "S3DestinationBucket": {
-            "Properties": {
-                "BucketName": "nicor-data-stream"
-            },
-            "Type": "AWS::S3::Bucket"
         }
     }
 }
