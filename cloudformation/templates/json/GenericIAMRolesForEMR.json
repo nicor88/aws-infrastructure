@@ -99,6 +99,23 @@
                             "Statement": [
                                 {
                                     "Action": [
+                                        "kinesis:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "GrantKinesis"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
                                         "lambda:InvokeFunction"
                                     ],
                                     "Effect": "Allow",

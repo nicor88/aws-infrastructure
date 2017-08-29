@@ -85,6 +85,20 @@ emr_job_flow_role = template.add_resource(
                     ]
                 }),
             iam.Policy(
+                PolicyName='GrantKinesis',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('kinesis', '*'),
+                            ],
+                            Resource=["*"]
+                        ),
+                    ]
+                }),
+            iam.Policy(
                 PolicyName='InvokeDeleteLambda',
                 PolicyDocument={
                     "Version": "2012-10-17",
