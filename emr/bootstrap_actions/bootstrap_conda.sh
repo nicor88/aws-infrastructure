@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Install conda
-wget https://repo.continuum.io/miniconda/Miniconda3-4.3.21-Linux-x86_64.sh -O /home/hadoop/miniconda.sh
+wget https://repo.continuum.io/miniconda/Miniconda3-4.2.12-Linux-x86_64.sh -O /home/hadoop/miniconda.sh
 /bin/bash /home/hadoop/miniconda.sh -b -p /home/hadoop/miniconda
 
 # for debug
