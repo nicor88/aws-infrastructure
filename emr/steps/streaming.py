@@ -17,6 +17,7 @@ def printRecord(rdd):
     print("========================================================")
     # rdd.foreach(lambda record: print(record.encode('utf8')))
     print(rdd.count())
+    # TODO to save use append mode
     # rdd.saveAsTextFile('s3://nicor-data/test-streaming/')
 
 app_name = 'TestStreaming'
@@ -35,8 +36,10 @@ dstream.foreachRDD(printRecord)
 streaming_ctx.start()
 streaming_ctx.awaitTermination()
 
-# example
-# spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master yarn app.py
+# examples
+# spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master yarn steps/streaming.py
 # https://github.com/MayankAyush/KinesisSparkIntegration/blob/41707745c477b8e39c724b7ffd167bd4ff690885/pysparkKinesisIntegration.py
 # https://github.com/apache/spark/blob/master/external/kinesis-asl/src/main/python/examples/streaming/kinesis_wordcount_asl.py
-# https://github.com/nicor88/aws-dev/blob/spark-streaming/emr/steps/streaming.py
+
+# submit job example
+# spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master local[4] steps/streaming.py
