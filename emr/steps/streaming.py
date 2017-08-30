@@ -16,7 +16,7 @@ def printRecord(rdd):
     print("Starting new RDD")
     print("========================================================")
     # rdd.foreach(lambda record: print(record.encode('utf8')))
-    print(rdd.count())
+    print('---------> Cound of RDD {}'.format(rdd.count()))
     # TODO to save use append mode
     # rdd.saveAsTextFile('s3://nicor-data/test-streaming/')
 
@@ -43,3 +43,7 @@ streaming_ctx.awaitTermination()
 
 # submit job example
 # spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master local[4] steps/streaming.py
+# spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master yarn --num-executors 1 steps/streaming.py
+
+## Some learnings
+# use a number of executors == of number of shards for now
