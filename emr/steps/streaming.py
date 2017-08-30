@@ -8,14 +8,17 @@ spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-ki
 spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master yarn --num-executors 4 steps/streaming.py
 
 # Notes
-use a number of executors multiple of the number of shards (one executor for core at least)
+- Use a number of executors multiple of the number of shards (one executor for core at least)
+- It looks that the app need to be initialize first with
 
 # References
 https://github.com/MayankAyush/KinesisSparkIntegration/blob/41707745c477b8e39c724b7ffd167bd4ff690885/pysparkKinesisIntegration.py
 https://github.com/apache/spark/blob/master/external/kinesis-asl/src/main/python/examples/streaming/kinesis_wordcount_asl.py
 
 """
+import datetime as dt
 import json
+import uuid
 
 from pyspark.sql import SparkSession
 from pyspark.sql import SQLContext
@@ -37,8 +40,20 @@ streaming_ctx = StreamingContext(sc, windows_size_secs)
 
 def process_event(event):
     json_event = json.loads(event)
+    # the event is print only if the app is running in master mode local
     print(json_event)
     return json_event
+
+
+def build_path(*, lang):
+    base_path = 's3://nicor-data/twitter'
+    formatted_date = dt.datetime.now().strftime('%Y/%m/%d/%H')
+    batch_id = str(uuid.uuid4())
+    final_path = '{base_path}/{lang}/{date}/{batch_id}/'.format(base_path=base_path,
+                                                                lang=lang,
+                                                                date=formatted_date,
+                                                                batch_id=batch_id)
+    return final_path
 
 
 def handle_rdd(rdd):
@@ -46,8 +61,13 @@ def handle_rdd(rdd):
     rdd_count = rdd.count()
     print('---------> Count of Initial RDD {}'.format(rdd_count))
     if rdd_count > 0:
+        lang = 'en'
         rdd_transformed = rdd.map(lambda e: process_event(e))
         print('---------> Count of Transformed RDD {}'.format(rdd_transformed.count()))
+        rdd_filtered = rdd_transformed.filter(lambda e: e['lang'] == lang)
+        # just a simple example to filter the RDD
+        print('---------> Count of Filtered RDD {}'.format(rdd_filtered.count()))
+        rdd.saveAsTextFile(build_path(lang=lang))
 
 
 dstream = KinesisUtils.createStream(streaming_ctx,
