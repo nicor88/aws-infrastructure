@@ -46,4 +46,5 @@ streaming_ctx.awaitTermination()
 # spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kinesis-asl_2.11:2.2.0 --master yarn --num-executors 1 steps/streaming.py
 
 ## Some learnings
-# use a number of executors == of number of shards for now
+# use a number of executors multiple of the number of shards
+# one executor for core at least
