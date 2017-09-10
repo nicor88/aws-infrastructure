@@ -57,6 +57,20 @@ emr_job_flow_role = template.add_resource(
         },
         Policies=[
             iam.Policy(
+                PolicyName='GrantCloudwatch',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('cloudwatch', '*'),
+                            ],
+                            Resource=['*']
+                        ),
+                    ]
+                }),
+            iam.Policy(
                 PolicyName='GrantLogs',
                 PolicyDocument={
                     "Version": "2012-10-17",
@@ -79,6 +93,34 @@ emr_job_flow_role = template.add_resource(
                             Effect=Allow,
                             Action=[
                                 Action('s3', '*'),
+                            ],
+                            Resource=["*"]
+                        ),
+                    ]
+                }),
+            iam.Policy(
+                PolicyName='GrantKinesis',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('kinesis', '*'),
+                            ],
+                            Resource=["*"]
+                        ),
+                    ]
+                }),
+            iam.Policy(
+                PolicyName='GrantDynamo',
+                PolicyDocument={
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        Statement(
+                            Effect=Allow,
+                            Action=[
+                                Action('dynamodb', '*'),
                             ],
                             Resource=["*"]
                         ),
