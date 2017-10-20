@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/nicor88/aws-dev.svg?branch=master)](https://travis-ci.org/nicor88/aws-dev)
+[![Build Status](https://travis-ci.org/nicor88/aws-infrastructure.svg?branch=master)](https://travis-ci.org/nicor88/aws-infrastructure)
 
 # aws-infrastructure
 Collection of resources to manage AWS infrastructure
