@@ -1,4 +1,4 @@
-name: aws-dev
+name: aws-infrastructure
 channels:
 - defaults
 - conda-forge
