@@ -100,6 +100,9 @@ stack_args = {
             'Key': 'Purpose',
             'Value': 'HelloWorldLambda'
         }
+    ],
+    'NotificationARNs': [
+        'arn:aws:sns:eu-west-1:749785218022:cloudformation'
     ]
 }
 
