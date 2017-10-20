@@ -159,7 +159,7 @@ stack_args = {
         },
         {
             'ParameterKey': 'MasterUserPassword',
-            'ParameterValue': os.environ['REDSHIFT_MASTER_PASSWORD'],
+            'ParameterValue': os.environ['DB_MASTER_PASSWORD'],
         },
     ],
     'Tags': [
