@@ -24,6 +24,12 @@
             }
         }
     },
+    "Parameters": {
+        "KMSArn": {
+            "Description": "KMS arn used inside the lambda",
+            "Type": "String"
+        }
+    },
     "Resources": {
         "ExecutionRole": {
             "Properties": {
@@ -64,11 +70,58 @@
                             "Version": "2012-10-17"
                         },
                         "PolicyName": "GrantLogs"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "kms:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        "*"
+                                    ],
+                                    "Sid": "Kms"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "KMS"
                     }
                 ],
                 "RoleName": "ExecutionRole-ExampleLambdasStack"
             },
             "Type": "AWS::IAM::Role"
+        },
+        "HelloWorldEncVarsFunction": {
+            "Properties": {
+                "Code": {
+                    "S3Bucket": "nicor-dev",
+                    "S3Key": "deployments/lambdas/travis_build/hello_world.zip"
+                },
+                "Description": "Hello world lambdas with encrypted vars Python 3.6",
+                "Environment": {
+                    "Variables": {
+                        "SAMPLE_VAR": "AQICAHhF8ODh0YKuqTU0H95UxE9cqgvlUixFYzJFVTSkZ9pIwAESnleVwQKwP585ulyc/ibCAAAAYjBgBgkqhkiG9w0BBwagUzBRAgEAMEwGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMrIH0nJzULmZpIBqbAgEQgB8PvwaiR0H4wjAl3NKtG+rrwnXOlQSIfD4TCY6wci+4"
+                    }
+                },
+                "FunctionName": "hello_world_enc_vars",
+                "Handler": "lambda_function.lambda_handler",
+                "KmsKeyArn": {
+                    "Ref": "KMSArn"
+                },
+                "MemorySize": 128,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "ExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": "30"
+            },
+            "Type": "AWS::Lambda::Function"
         },
         "HelloWorldFunction": {
             "Properties": {
