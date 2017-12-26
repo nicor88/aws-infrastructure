@@ -26,7 +26,7 @@ aws_access_key_id=foo2
 aws_secret_access_key=bar2
 </pre>
 
-In bash or python setup this env variables:
+In setup this env variables, to work with a specific profile:
 <pre>import os
 os.environ["AWS_PROFILE"] = "nicor88"
 os.environ["AWS_DEFAULT_REGION"] = "eu-west-1"
