@@ -21,9 +21,15 @@ To manage different profiles create a file __~/.aws/credentials__ with this cont
 aws_access_key_id=foo
 aws_secret_access_key=bar
 
-[nicor88-aws]
+[nicor88]
 aws_access_key_id=foo2
 aws_secret_access_key=bar2
+</pre>
+
+In bash or python setup this env variables:
+<pre>import os
+os.environ["AWS_PROFILE"] = "nicor88"
+os.environ["AWS_DEFAULT_REGION"] = "eu-west-1"
 </pre>
 
 ### Handle profiles in boto3
