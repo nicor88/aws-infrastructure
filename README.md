@@ -11,7 +11,7 @@ source activate aws-infrastructure
 The env contain also **aws cli**
 
 After installing a new package update the env file:
-<pre>conda env export > conda-env.yml
+<pre>conda env export -n aws-infrastructure > conda-env.yml
 </pre>
 
 ## AWS Profiles
