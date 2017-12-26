@@ -20,7 +20,7 @@ before_install:
   - conda info -a
 
 install:
-  - conda env create -n aws-infrastructure -f $TRAVIS_BUILD_DIR/conda-env.yml
+  - conda env create -n aws-infrastructure -f $TRAVIS_BUILD_DIR/conda-env.yml --quiet
   - source activate aws-infrastructure
   - conda list
 
