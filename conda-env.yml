@@ -1,7 +1,6 @@
 name: aws-infrastructure
 channels:
 - defaults
-- conda-forge
 dependencies:
 - boto3=1.4.4=py36_0
 - botocore=1.5.38=py36_0
@@ -27,9 +26,10 @@ dependencies:
 - pip:
   - awacs==0.6.2
   - awscli==1.11.83
-  - cfn-flip==0.2.1
+  - cfn-flip==1.0.0
+  - click==6.7
   - colorama==0.3.7
   - pyasn1==0.2.3
   - pyyaml==3.12
   - rsa==3.4.2
-  - troposphere==1.9.5
+  - troposphere==2.1.2
