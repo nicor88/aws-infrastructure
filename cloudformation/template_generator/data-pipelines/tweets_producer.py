@@ -379,4 +379,4 @@ cfn.validate_template(TemplateBody=template_json)
 # cfn.delete_stack(StackName=STACK_NAME)
 
 # code deploy path, just for manual steps
-print(f's3://nicor-dev/deployments/apps/twitter-to-kinesis/{deployment_commithash}.zip')
+# print(f's3://nicor-dev/deployments/apps/twitter-to-kinesis/{deployment_commithash}.zip')
