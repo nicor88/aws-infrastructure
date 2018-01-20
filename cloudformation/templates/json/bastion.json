@@ -1,0 +1,294 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Dev Server Stack",
+    "Outputs": {
+        "Bastion": {
+            "Description": "EC2 Instance",
+            "Value": {
+                "Ref": "Bastion"
+            }
+        }
+    },
+    "Parameters": {
+        "AMI": {
+            "Default": "ami-d7b9a2b1",
+            "Description": "AMI ",
+            "Type": "String"
+        },
+        "InstanceType": {
+            "Default": "t2.micro",
+            "Description": "AMI ",
+            "Type": "String"
+        },
+        "PublicRouteTable": {
+            "Default": "rtb-1197ed76",
+            "Description": "Routing Table used for Public subnets",
+            "Type": "String"
+        },
+        "VpcId": {
+            "Default": "vpc-8b708fec",
+            "Description": "VPC ID",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "Bastion": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "commands": {
+                            "download_miniconda": {
+                                "command": "su - ec2-user -c \"wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh\""
+                            },
+                            "install_miniconda": {
+                                "command": "su - ec2-user -c \"bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda\""
+                            },
+                            "remove_installer": {
+                                "command": "rm -rf /home/ec2-user/miniconda.sh"
+                            },
+                            "update_yum_packages": {
+                                "command": "yum update -y"
+                            }
+                        },
+                        "files": {
+                            "/etc/cfn/cfn-hup.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[main]\n",
+                                            "stack=",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            },
+                                            "\n",
+                                            "region=",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n",
+                                            "interval=2",
+                                            "\n"
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000400",
+                                "owner": "root"
+                            },
+                            "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[cfn-auto-reloader-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.Bastion.Metadata.AWS::CloudFormation::Init\n",
+                                            "action=/opt/aws/bin/cfn-init -v",
+                                            " --stack ",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            },
+                                            " --resource Bastion",
+                                            " --region ",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\nrunas=root\n"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "/home/ec2-user/.bashrc": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "export PATH=\"/home/ec2-user/miniconda/bin:$PATH\"\n"
+                                        ]
+                                    ]
+                                },
+                                "group": "ec2-user",
+                                "mode": "000400",
+                                "owner": "ec2-user"
+                            },
+                            "/home/ec2-user/.ssh/authorized_keys": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjKxODWLSrmQAemYnpvYchmy7bwWvIKNWpHtfRiD7UKqnUV0euoFWIr9j+OwiNyMp/iopZQh7A8c+B4TYI8pd///J7ZWPSipndJkWc4HrnU37X66mKInGYIaPZAfek69eeUkl5cekqkEd6l6WsBUlrjPvMYtyGdDtd42M+aNQoy1TWq2C/6x0gBQaY/CUvHFBrMHr5ObhZvN7ou6PSyBCGgQxFf5jmnwSzeBRc/iWxMBltM/SQSTAgyKWdolcgBNTOTre5z8R8FCv/CIsfLoqUFuWthrT3YfpG1iOWlL3GBm8XxXlgrmvMUhV1qvcO/1no6ZeSp8VQMiTYkvAOQ7Hd\n"
+                                        ]
+                                    ]
+                                },
+                                "group": "ec2-user",
+                                "mode": "000400",
+                                "owner": "ec2-user"
+                            }
+                        },
+                        "services": {
+                            "sysvinit": {
+                                "cfn-hup": {
+                                    "enabled": "true",
+                                    "ensureRunning": "true",
+                                    "files": [
+                                        "/etc/cfn/cfn-hup.conf",
+                                        "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": "25",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "ImageId": {
+                    "Ref": "AMI"
+                },
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "InstanceType": "t2.micro",
+                "Monitoring": "true",
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": "true",
+                        "DeleteOnTermination": "true",
+                        "Description": "Bastion Host Interface",
+                        "DeviceIndex": 0,
+                        "GroupSet": [
+                            {
+                                "Ref": "BastionSg"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "BastionHostSubnet"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "dev-server"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -xe\n",
+                                "/opt/aws/bin/cfn-init -v ",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource Bastion",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "yum install -y aws-cfn-bootstrap\n",
+                                "/opt/aws/bin/cfn-hup || error_exit \"Failed to start cfn-hup\"",
+                                "\n",
+                                "/opt/aws/bin/cfn-signal -e $? ",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource Bastion",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "BastionHostSubnet": {
+            "Properties": {
+                "AvailabilityZone": "eu-west-1a",
+                "CidrBlock": "172.31.10.0/24",
+                "Tags": [
+                    {
+                        "Key": "AZ",
+                        "Value": "eu-west-1b"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "bastion-public-eu-west-1a"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "BastionHostSubnetAssociation": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PublicRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "BastionHostSubnet"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "BastionSg": {
+            "Properties": {
+                "GroupDescription": "Allow SSH traffic",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "bastion-sg"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        }
+    }
+}
