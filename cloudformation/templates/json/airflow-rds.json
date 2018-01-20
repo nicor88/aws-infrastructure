@@ -1,0 +1,209 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Stack containing an RDS Postgres Instance for Airflow",
+    "Outputs": {
+        "RDSPostgresDBName": {
+            "Description": "RDS Postgres DB name",
+            "Value": {
+                "Ref": "DBName"
+            }
+        },
+        "RDSPostgresEndpointAddress": {
+            "Description": "RDS Postgres Instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AirflowRDS",
+                    "Endpoint.Address"
+                ]
+            }
+        },
+        "RDSPostgresEndpointPort": {
+            "Description": "RDS Postgres Instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "AirflowRDS",
+                    "Endpoint.Port"
+                ]
+            }
+        },
+        "RDSPostgresInstance": {
+            "Description": "RDS Postgres Instance",
+            "Value": {
+                "Ref": "AirflowRDS"
+            }
+        }
+    },
+    "Parameters": {
+        "DBName": {
+            "Default": "airflow",
+            "Description": "Name of the Database used for Metadata storage by Airflow",
+            "Type": "String"
+        },
+        "MasterUser": {
+            "Default": "airflow",
+            "Description": "Master User for Postgres Instance",
+            "Type": "String"
+        },
+        "MasterUserPassword": {
+            "Default": "airflow_dev",
+            "Description": " Master User Password for Postgres Instance",
+            "Type": "String"
+        },
+        "PrivateRouteTable": {
+            "Default": "rtb-964c7ef0",
+            "Description": "Routing Table used for Private subnets",
+            "Type": "String"
+        },
+        "VpcId": {
+            "Default": "vpc-8b708fec",
+            "Description": "VPC ID",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "AirflowRDS": {
+            "Properties": {
+                "AllocatedStorage": "10",
+                "DBInstanceClass": "db.t2.micro",
+                "DBInstanceIdentifier": "airflow",
+                "DBName": {
+                    "Ref": "DBName"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "SubnetGroup"
+                },
+                "Engine": "postgres",
+                "EngineVersion": "9.6.3",
+                "MasterUserPassword": {
+                    "Ref": "MasterUserPassword"
+                },
+                "MasterUsername": {
+                    "Ref": "MasterUser"
+                },
+                "VPCSecurityGroups": [
+                    {
+                        "Ref": "AirflowRdsSg"
+                    }
+                ]
+            },
+            "Type": "AWS::RDS::DBInstance"
+        },
+        "AirflowRDSPrivateSubnetEuWest1a": {
+            "Properties": {
+                "AvailabilityZone": "eu-west-1a",
+                "CidrBlock": "172.31.20.0/24",
+                "Tags": [
+                    {
+                        "Key": "AZ",
+                        "Value": "eu-west-1b"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "airflow-rds-private-eu-west-1a"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "AirflowRDSPrivateSubnetEuWest1aRouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "AirflowRDSPrivateSubnetEuWest1a"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "AirflowRDSPrivateSubnetEuWest1b": {
+            "Properties": {
+                "AvailabilityZone": "eu-west-1b",
+                "CidrBlock": "172.31.21.0/24",
+                "Tags": [
+                    {
+                        "Key": "AZ",
+                        "Value": "eu-west-1b"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "airflow-rds-private-eu-west-1b"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "AirflowRDSPrivateSubnetEuWest1bRouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "AirflowRDSPrivateSubnetEuWest1b"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "AirflowRdsSg": {
+            "Properties": {
+                "GroupDescription": "Allow Postgress Traffic inside VPC",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "172.31.10.0/24",
+                        "FromPort": "5432",
+                        "IpProtocol": "tcp",
+                        "ToPort": "5432"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "airflow-rds-sg"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "SubnetGroup": {
+            "Properties": {
+                "DBSubnetGroupDescription": "Subnets group for Postgres Instance",
+                "SubnetIds": [
+                    {
+                        "Ref": "AirflowRDSPrivateSubnetEuWest1a"
+                    },
+                    {
+                        "Ref": "AirflowRDSPrivateSubnetEuWest1b"
+                    }
+                ]
+            },
+            "Type": "AWS::RDS::DBSubnetGroup"
+        }
+    }
+}

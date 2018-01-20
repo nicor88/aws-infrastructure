@@ -58,8 +58,14 @@
                             "download_miniconda": {
                                 "command": "su - ec2-user -c \"wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/ec2-user/miniconda.sh\""
                             },
+                            "install_gcc": {
+                                "command": "yum install gcc -y"
+                            },
                             "install_miniconda": {
                                 "command": "su - ec2-user -c \"bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda\""
+                            },
+                            "install_pgcli": {
+                                "command": "PATH=\"/home/ec2-user/miniconda/bin:$PATH\" pip install pgcli"
                             },
                             "remove_installer": {
                                 "command": "rm -rf /home/ec2-user/miniconda.sh"
@@ -135,7 +141,8 @@
                                     "Fn::Join": [
                                         "",
                                         [
-                                            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjKxODWLSrmQAemYnpvYchmy7bwWvIKNWpHtfRiD7UKqnUV0euoFWIr9j+OwiNyMp/iopZQh7A8c+B4TYI8pd///J7ZWPSipndJkWc4HrnU37X66mKInGYIaPZAfek69eeUkl5cekqkEd6l6WsBUlrjPvMYtyGdDtd42M+aNQoy1TWq2C/6x0gBQaY/CUvHFBrMHr5ObhZvN7ou6PSyBCGgQxFf5jmnwSzeBRc/iWxMBltM/SQSTAgyKWdolcgBNTOTre5z8R8FCv/CIsfLoqUFuWthrT3YfpG1iOWlL3GBm8XxXlgrmvMUhV1qvcO/1no6ZeSp8VQMiTYkvAOQ7Hd\n"
+                                            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjKxODWLSrmQAemYnpvYchmy7bwWvIKNWpHtfRiD7UKqnUV0euoFWIr9j+OwiNyMp/iopZQh7A8c+B4TYI8pd///J7ZWPSipndJkWc4HrnU37X66mKInGYIaPZAfek69eeUkl5cekqkEd6l6WsBUlrjPvMYtyGdDtd42M+aNQoy1TWq2C/6x0gBQaY/CUvHFBrMHr5ObhZvN7ou6PSyBCGgQxFf5jmnwSzeBRc/iWxMBltM/SQSTAgyKWdolcgBNTOTre5z8R8FCv/CIsfLoqUFuWthrT3YfpG1iOWlL3GBm8XxXlgrmvMUhV1qvcO/1no6ZeSp8VQMiTYkvAOQ7Hd\n",
+                                            "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDfhaE+TzNY4YlrghWjT7Hc2u1GO9zZJ/zYXrzRT7FCJ8Gr1rRXG8mZ6vQG6SiyPsIL2KQervAlU/7U9IrqXwJM69smDiazYz0TnXu9Bo0Y/fJ+ZmOvlzajc1ZzwcS9p1SO327HlxcCEfeA2Vv8dN88WbwjVOOCSQudQBsrxi6O6pENjYHIOS8pWNHGeUIB6ZoUovvo4tBfOeSBXeGIHSGZiVWNzaDzOPfWBd5M24vyQbsRiZiggAq/4uHtYoi6BKVJtVos5YOM0cuWGSnhptVoAS7eiA3fzcCZb5biFIrjOoJNG8JtwrewBzrOFxHjxr5Tzk1x7RQPw7UQdEbcBov/h5pfViEnUig3YNNb6xYx82ZMCIoGLgRZ8U98B6vVt5/cZRAkS/Oz25SyhkLwjiciKG/wnwAQmafI9IzzCbEmkrysMKPt2t0//umtGRGS3+UiBmNY0HZ0fTs+eBkaqQp49mabdmEGD7kTHaZNjtG8rKeuKElKRUcIotf6l4WimaOgV95U7u9nTkK1QNddn5/huJKw+K0R6oyCqmDzsL8XvWF4dck57FRc0aJnMU5aHCOKzRs3EyoYII4q+/TZXbQ02TOb/aXsXXSq+c/MIzVAS+U9+SxXUr5dguCrpzUlmsYHZLhgJBt1TeJwpAUCIJJRqJYgkh24EXnTE7Z0WaQ7Gw==\n"
                                         ]
                                     ]
                                 },
