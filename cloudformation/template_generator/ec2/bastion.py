@@ -1,7 +1,7 @@
 import boto3
 
 from troposphere import ec2
-from troposphere import Base64, Join, Output, Parameter, Ref, Tags, Template
+from troposphere import Base64, Join, Output, Parameter, Ref, Tags, Template, GetAtt
 
 from troposphere.cloudformation import Init, InitFile, InitFiles, InitConfig, InitService, \
     InitServices
@@ -234,6 +234,18 @@ template.add_output([
     Output('Bastion',
            Description='EC2 Instance',
            Value=Ref(ec2_instance))
+])
+
+template.add_output([
+    Output('BastionPublicIP',
+           Description='Bastion Host Public IP',
+           Value=GetAtt(ec2_instance, 'PublicIp'))
+])
+
+template.add_output([
+    Output('BastionPublicPublicDnsName',
+           Description='Bastion Host Public DNS Name',
+           Value=GetAtt(ec2_instance, 'PublicDnsName'))
 ])
 
 template_json = template.to_json(indent=4)

@@ -1,11 +1,29 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Dev Server Stack",
+    "Description": "Stack containing a bastion host and all the needed resources",
     "Outputs": {
         "Bastion": {
             "Description": "EC2 Instance",
             "Value": {
                 "Ref": "Bastion"
+            }
+        },
+        "BastionPublicIP": {
+            "Description": "Bastion Host Public IP",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Bastion",
+                    "PublicIp"
+                ]
+            }
+        },
+        "BastionPublicPublicDnsName": {
+            "Description": "Bastion Host Public DNS Name",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Bastion",
+                    "PublicDnsName"
+                ]
             }
         }
     },
