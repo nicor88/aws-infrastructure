@@ -1,28 +1,28 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Stack containing a bastion host and all the needed resources",
+    "Description": "Stack containing Airflow",
     "Outputs": {
-        "Bastion": {
+        "Airflow": {
             "Description": "EC2 Instance",
             "Value": {
-                "Ref": "Bastion"
+                "Ref": "Airflow"
             }
         },
-        "BastionPublicIP": {
-            "Description": "Bastion Host Public IP",
+        "AirflowPrivateDnsName": {
+            "Description": "Airflow Host Private DNS Name",
             "Value": {
                 "Fn::GetAtt": [
-                    "Bastion",
-                    "PublicIp"
+                    "Airflow",
+                    "PrivateDnsName"
                 ]
             }
         },
-        "BastionPublicPublicDnsName": {
-            "Description": "Bastion Host Public DNS Name",
+        "AirflowPrivateIP": {
+            "Description": "Airflow Host Private IP",
             "Value": {
                 "Fn::GetAtt": [
-                    "Bastion",
-                    "PublicDnsName"
+                    "Airflow",
+                    "PrivateIp"
                 ]
             }
         }
@@ -38,9 +38,9 @@
             "Description": "Instance Type",
             "Type": "String"
         },
-        "PublicRouteTable": {
-            "Default": "rtb-1197ed76",
-            "Description": "Routing Table used for Public subnets",
+        "PrivateRouteTable": {
+            "Default": "rtb-964c7ef0",
+            "Description": "Routing Table used for Private subnets",
             "Type": "String"
         },
         "VpcId": {
@@ -50,7 +50,7 @@
         }
     },
     "Resources": {
-        "Bastion": {
+        "Airflow": {
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "config": {
@@ -63,9 +63,6 @@
                             },
                             "install_miniconda": {
                                 "command": "su - ec2-user -c \"bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda\""
-                            },
-                            "install_pgcli": {
-                                "command": "PATH=\"/home/ec2-user/miniconda/bin:$PATH\" pip install pgcli"
                             },
                             "remove_installer": {
                                 "command": "rm -rf /home/ec2-user/miniconda.sh"
@@ -107,13 +104,13 @@
                                         [
                                             "[cfn-auto-reloader-hook]\n",
                                             "triggers=post.update\n",
-                                            "path=Resources.Bastion.Metadata.AWS::CloudFormation::Init\n",
+                                            "path=Resources.Airflow.Metadata.AWS::CloudFormation::Init\n",
                                             "action=/opt/aws/bin/cfn-init -v",
                                             " --stack ",
                                             {
                                                 "Ref": "AWS::StackId"
                                             },
-                                            " --resource Bastion",
+                                            " --resource Airflow",
                                             " --region ",
                                             {
                                                 "Ref": "AWS::Region"
@@ -183,26 +180,18 @@
                 "InstanceInitiatedShutdownBehavior": "stop",
                 "InstanceType": "t2.micro",
                 "Monitoring": "true",
-                "NetworkInterfaces": [
+                "SecurityGroupIds": [
                     {
-                        "AssociatePublicIpAddress": "true",
-                        "DeleteOnTermination": "true",
-                        "Description": "Bastion Host Interface",
-                        "DeviceIndex": 0,
-                        "GroupSet": [
-                            {
-                                "Ref": "BastionSg"
-                            }
-                        ],
-                        "SubnetId": {
-                            "Ref": "BastionHostSubnet"
-                        }
+                        "Ref": "AirflowSg"
                     }
                 ],
+                "SubnetId": {
+                    "Ref": "Subnet"
+                },
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "dev-server"
+                        "Value": "airflow"
                     },
                     {
                         "Key": "StackName",
@@ -222,7 +211,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource Bastion",
+                                " --resource Airflow",
                                 " --region ",
                                 {
                                     "Ref": "AWS::Region"
@@ -236,7 +225,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource Bastion",
+                                " --resource Airflow",
                                 " --region ",
                                 {
                                     "Ref": "AWS::Region"
@@ -249,21 +238,39 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-        "BastionHostRouteTableAssociation": {
+        "AirflowSg": {
             "Properties": {
-                "RouteTableId": {
-                    "Ref": "PublicRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "BastionHostSubnet"
+                "GroupDescription": "Airflow security group",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "172.31.0.0/16",
+                        "FromPort": "1",
+                        "IpProtocol": "tcp",
+                        "ToPort": "65535"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "airflow-sg"
+                    },
+                    {
+                        "Key": "StackName",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VpcId"
                 }
             },
-            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+            "Type": "AWS::EC2::SecurityGroup"
         },
-        "BastionHostSubnet": {
+        "Subnet": {
             "Properties": {
                 "AvailabilityZone": "eu-west-1a",
-                "CidrBlock": "172.31.10.0/24",
+                "CidrBlock": "172.31.24.0/24",
                 "Tags": [
                     {
                         "Key": "AZ",
@@ -271,7 +278,7 @@
                     },
                     {
                         "Key": "Name",
-                        "Value": "bastion-public-eu-west-1a"
+                        "Value": "airflow-private-eu-west-1a"
                     },
                     {
                         "Key": "StackName",
@@ -286,34 +293,16 @@
             },
             "Type": "AWS::EC2::Subnet"
         },
-        "BastionSg": {
+        "SubnetRouteTableAssociation": {
             "Properties": {
-                "GroupDescription": "Allow SSH traffic",
-                "SecurityGroupIngress": [
-                    {
-                        "CidrIp": "0.0.0.0/0",
-                        "FromPort": "22",
-                        "IpProtocol": "tcp",
-                        "ToPort": "22"
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "bastion-sg"
-                    },
-                    {
-                        "Key": "StackName",
-                        "Value": {
-                            "Ref": "AWS::StackName"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VpcId"
+                "RouteTableId": {
+                    "Ref": "PrivateRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "Subnet"
                 }
             },
-            "Type": "AWS::EC2::SecurityGroup"
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
         }
     }
 }

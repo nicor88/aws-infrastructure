@@ -1,15 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Stack containing a bastion host and all the needed resources
+Description: Stack containing Airflow
 Outputs:
-  Bastion:
+  Airflow:
     Description: EC2 Instance
-    Value: !Ref 'Bastion'
-  BastionPublicIP:
-    Description: Bastion Host Public IP
-    Value: !GetAtt 'Bastion.PublicIp'
-  BastionPublicPublicDnsName:
-    Description: Bastion Host Public DNS Name
-    Value: !GetAtt 'Bastion.PublicDnsName'
+    Value: !Ref 'Airflow'
+  AirflowPrivateDnsName:
+    Description: Airflow Host Private DNS Name
+    Value: !GetAtt 'Airflow.PrivateDnsName'
+  AirflowPrivateIP:
+    Description: Airflow Host Private IP
+    Value: !GetAtt 'Airflow.PrivateIp'
 Parameters:
   AMI:
     Default: ami-d7b9a2b1
@@ -19,16 +19,16 @@ Parameters:
     Default: t2.micro
     Description: Instance Type
     Type: String
-  PublicRouteTable:
-    Default: rtb-1197ed76
-    Description: Routing Table used for Public subnets
+  PrivateRouteTable:
+    Default: rtb-964c7ef0
+    Description: Routing Table used for Private subnets
     Type: String
   VpcId:
     Default: vpc-8b708fec
     Description: VPC ID
     Type: String
 Resources:
-  Bastion:
+  Airflow:
     Metadata:
       AWS::CloudFormation::Init:
         config:
@@ -40,8 +40,6 @@ Resources:
               command: yum install gcc -y
             install_miniconda:
               command: su - ec2-user -c "bash /home/ec2-user/miniconda.sh -b -p /home/ec2-user/miniconda"
-            install_pgcli:
-              command: PATH="/home/ec2-user/miniconda/bin:$PATH" pip install pgcli
             remove_installer:
               command: rm -rf /home/ec2-user/miniconda.sh
             update_yum_packages:
@@ -67,11 +65,11 @@ Resources:
                 - ''
                 - - "[cfn-auto-reloader-hook]\n"
                   - "triggers=post.update\n"
-                  - "path=Resources.Bastion.Metadata.AWS::CloudFormation::Init\n"
+                  - "path=Resources.Airflow.Metadata.AWS::CloudFormation::Init\n"
                   - action=/opt/aws/bin/cfn-init -v
                   - ' --stack '
                   - !Ref 'AWS::StackId'
-                  - ' --resource Bastion'
+                  - ' --resource Airflow'
                   - ' --region '
                   - !Ref 'AWS::Region'
                   - "\nrunas=root\n"
@@ -109,17 +107,12 @@ Resources:
       InstanceInitiatedShutdownBehavior: stop
       InstanceType: t2.micro
       Monitoring: 'true'
-      NetworkInterfaces:
-        - AssociatePublicIpAddress: 'true'
-          DeleteOnTermination: 'true'
-          Description: Bastion Host Interface
-          DeviceIndex: 0
-          GroupSet:
-            - !Ref 'BastionSg'
-          SubnetId: !Ref 'BastionHostSubnet'
+      SecurityGroupIds:
+        - !Ref 'AirflowSg'
+      SubnetId: !Ref 'Subnet'
       Tags:
         - Key: Name
-          Value: dev-server
+          Value: airflow
         - Key: StackName
           Value: !Ref 'AWS::StackName'
       UserData: !Base64
@@ -129,7 +122,7 @@ Resources:
             - '/opt/aws/bin/cfn-init -v '
             - ' --stack '
             - !Ref 'AWS::StackName'
-            - ' --resource Bastion'
+            - ' --resource Airflow'
             - ' --region '
             - !Ref 'AWS::Region'
             - "\n"
@@ -139,41 +132,41 @@ Resources:
             - '/opt/aws/bin/cfn-signal -e $? '
             - ' --stack '
             - !Ref 'AWS::StackName'
-            - ' --resource Bastion'
+            - ' --resource Airflow'
             - ' --region '
             - !Ref 'AWS::Region'
             - "\n"
     Type: AWS::EC2::Instance
-  BastionHostRouteTableAssociation:
+  AirflowSg:
     Properties:
-      RouteTableId: !Ref 'PublicRouteTable'
-      SubnetId: !Ref 'BastionHostSubnet'
-    Type: AWS::EC2::SubnetRouteTableAssociation
-  BastionHostSubnet:
-    Properties:
-      AvailabilityZone: eu-west-1a
-      CidrBlock: 172.31.10.0/24
-      Tags:
-        - Key: AZ
-          Value: eu-west-1b
-        - Key: Name
-          Value: bastion-public-eu-west-1a
-        - Key: StackName
-          Value: !Ref 'AWS::StackName'
-      VpcId: !Ref 'VpcId'
-    Type: AWS::EC2::Subnet
-  BastionSg:
-    Properties:
-      GroupDescription: Allow SSH traffic
+      GroupDescription: Airflow security group
       SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: '22'
+        - CidrIp: 172.31.0.0/16
+          FromPort: '1'
           IpProtocol: tcp
-          ToPort: '22'
+          ToPort: '65535'
       Tags:
         - Key: Name
-          Value: bastion-sg
+          Value: airflow-sg
         - Key: StackName
           Value: !Ref 'AWS::StackName'
       VpcId: !Ref 'VpcId'
     Type: AWS::EC2::SecurityGroup
+  Subnet:
+    Properties:
+      AvailabilityZone: eu-west-1a
+      CidrBlock: 172.31.24.0/24
+      Tags:
+        - Key: AZ
+          Value: eu-west-1b
+        - Key: Name
+          Value: airflow-private-eu-west-1a
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: !Ref 'VpcId'
+    Type: AWS::EC2::Subnet
+  SubnetRouteTableAssociation:
+    Properties:
+      RouteTableId: !Ref 'PrivateRouteTable'
+      SubnetId: !Ref 'Subnet'
+    Type: AWS::EC2::SubnetRouteTableAssociation

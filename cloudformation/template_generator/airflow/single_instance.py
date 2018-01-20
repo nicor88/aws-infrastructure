@@ -9,10 +9,10 @@ from troposphere.autoscaling import Metadata
 
 import cloudformation.utils as utils
 
-STACK_NAME = 'bastion'
+STACK_NAME = 'airflow'
 
 template = Template()
-description = 'Stack containing a bastion host and all the needed resources'
+description = 'Stack containing Airflow'
 template.add_description(description)
 template.add_version('2010-09-09')
 
@@ -25,12 +25,12 @@ vpc_id = template.add_parameter(
     )
 )
 
-public_route_table = template.add_parameter(
+private_route_table = template.add_parameter(
     Parameter(
-        'PublicRouteTable',
+        'PrivateRouteTable',
         Type='String',
-        Default='rtb-1197ed76',
-        Description='Routing Table used for Public subnets',
+        Default='rtb-964c7ef0',
+        Description='Routing Table used for Private subnets',
     )
 )
 
@@ -53,43 +53,43 @@ instance_type = template.add_parameter(
 )
 
 # Networking
-bastion_subnet = template.add_resource(
+subnet = template.add_resource(
     ec2.Subnet(
-        'BastionHostSubnet',
+        'Subnet',
         AvailabilityZone='eu-west-1a',
-        CidrBlock='172.31.10.0/24',
+        CidrBlock='172.31.24.0/24',
         VpcId=Ref(vpc_id),
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
             AZ='eu-west-1b',
-            Name='bastion-public-eu-west-1a'
+            Name='airflow-private-eu-west-1a'
         )
     )
 )
 
-bastion_subnet_route_table_association = template.add_resource(
-    ec2.SubnetRouteTableAssociation('BastionHostRouteTableAssociation',
-                                    RouteTableId=Ref(public_route_table),
-                                    SubnetId=Ref(bastion_subnet)
+subnet_route_table_association = template.add_resource(
+    ec2.SubnetRouteTableAssociation('SubnetRouteTableAssociation',
+                                    RouteTableId=Ref(private_route_table),
+                                    SubnetId=Ref(subnet)
                                     )
 )
 
 security_group = template.add_resource(
     ec2.SecurityGroup(
-        'BastionSg',
+        'AirflowSg',
         VpcId=Ref(vpc_id),
-        GroupDescription='Allow SSH traffic',
+        GroupDescription='Airflow security group',
         SecurityGroupIngress=[
             ec2.SecurityGroupRule(
                 IpProtocol='tcp',
-                FromPort='22',
-                ToPort='22',
-                CidrIp='0.0.0.0/0'
+                FromPort='1',
+                ToPort='65535',
+                CidrIp='172.31.0.0/16'
             )
         ],
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
-            Name='bastion-sg'
+            Name='airflow-sg'
         )
     )
 )
@@ -114,9 +114,9 @@ instance_metadata = Metadata(
             'remove_installer': {
                 'command': 'rm -rf /home/ec2-user/miniconda.sh',
             },
-            'install_pgcli': {
-                'command': 'PATH="/home/ec2-user/miniconda/bin:$PATH" pip install pgcli',
-            }
+            # 'install_pgcli': {
+            #     'command': 'PATH="/home/ec2-user/miniconda/bin:$PATH" pip install pgcli',
+            # }
         },
         files=InitFiles({
             # setup .bashrc
@@ -156,10 +156,10 @@ instance_metadata = Metadata(
                 content=Join('',
                              ['[cfn-auto-reloader-hook]\n',
                               'triggers=post.update\n',
-                              'path=Resources.Bastion.Metadata.AWS::CloudFormation::Init\n',
+                              'path=Resources.Airflow.Metadata.AWS::CloudFormation::Init\n',
                               'action=/opt/aws/bin/cfn-init -v',
                               ' --stack ', Ref('AWS::StackId'),
-                              ' --resource Bastion',
+                              ' --resource Airflow',
                               ' --region ', Ref('AWS::Region'),
                               '\n'
                               'runas=root\n',
@@ -183,17 +183,11 @@ instance_metadata = Metadata(
 
 # ec2 instance
 ec2_instance = template.add_resource(ec2.Instance(
-    'Bastion',
+    'Airflow',
     InstanceType='t2.micro',
     ImageId=Ref(ami_id),
-    NetworkInterfaces=[ec2.NetworkInterfaceProperty(
-        AssociatePublicIpAddress=True,
-        DeleteOnTermination=True,
-        DeviceIndex=0,
-        SubnetId=Ref(bastion_subnet),
-        GroupSet=[Ref(security_group)],
-        Description='Bastion Host Interface',
-    )],
+    SubnetId=Ref(subnet),
+    SecurityGroupIds=[Ref(security_group)],
     InstanceInitiatedShutdownBehavior='stop',
     Monitoring=True,
     Metadata=instance_metadata,
@@ -213,7 +207,7 @@ ec2_instance = template.add_resource(ec2.Instance(
              # cfn-init: install what is specified in the metadata section
              '/opt/aws/bin/cfn-init -v ',
              ' --stack ', Ref('AWS::StackName'),
-             ' --resource Bastion',
+             ' --resource Airflow',
              ' --region ', Ref('AWS::Region'), '\n',
 
              # cfn-hup
@@ -225,35 +219,35 @@ ec2_instance = template.add_resource(ec2.Instance(
              # cfn-signal
              '/opt/aws/bin/cfn-signal -e $? ',
              ' --stack ', Ref('AWS::StackName'),
-             ' --resource Bastion',
+             ' --resource Airflow',
              ' --region ', Ref('AWS::Region'),
              '\n'
              ])
     ),
     Tags=Tags(
         StackName=Ref('AWS::StackName'),
-        Name='dev-server',
+        Name='airflow',
     )
 )
 )
 
 # outputs
 template.add_output([
-    Output('Bastion',
+    Output('Airflow',
            Description='EC2 Instance',
            Value=Ref(ec2_instance))
 ])
 
 template.add_output([
-    Output('BastionPublicIP',
-           Description='Bastion Host Public IP',
-           Value=GetAtt(ec2_instance, 'PublicIp'))
+    Output('AirflowPrivateIP',
+           Description='Airflow Host Private IP',
+           Value=GetAtt(ec2_instance, 'PrivateIp'))
 ])
 
 template.add_output([
-    Output('BastionPublicDnsName',
-           Description='Bastion Host Public DNS Name',
-           Value=GetAtt(ec2_instance, 'PublicDnsName'))
+    Output('AirflowPrivateDnsName',
+           Description='Airflow Host Private DNS Name',
+           Value=GetAtt(ec2_instance, 'PrivateDnsName'))
 ])
 
 template_json = template.to_json(indent=4)
@@ -265,7 +259,7 @@ stack_args = {
     'Tags': [
         {
             'Key': 'Purpose',
-            'Value': 'Bastion'
+            'Value': 'Airflow'
         }
     ]
 }
