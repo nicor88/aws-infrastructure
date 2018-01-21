@@ -4,12 +4,12 @@ Outputs:
   Bastion:
     Description: EC2 Instance
     Value: !Ref 'Bastion'
+  BastionPublicDnsName:
+    Description: Bastion Host Public DNS Name
+    Value: !GetAtt 'Bastion.PublicDnsName'
   BastionPublicIP:
     Description: Bastion Host Public IP
     Value: !GetAtt 'Bastion.PublicIp'
-  BastionPublicPublicDnsName:
-    Description: Bastion Host Public DNS Name
-    Value: !GetAtt 'Bastion.PublicDnsName'
 Parameters:
   AMI:
     Default: ami-d7b9a2b1

@@ -8,21 +8,21 @@
                 "Ref": "Bastion"
             }
         },
+        "BastionPublicDnsName": {
+            "Description": "Bastion Host Public DNS Name",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Bastion",
+                    "PublicDnsName"
+                ]
+            }
+        },
         "BastionPublicIP": {
             "Description": "Bastion Host Public IP",
             "Value": {
                 "Fn::GetAtt": [
                     "Bastion",
                     "PublicIp"
-                ]
-            }
-        },
-        "BastionPublicPublicDnsName": {
-            "Description": "Bastion Host Public DNS Name",
-            "Value": {
-                "Fn::GetAtt": [
-                    "Bastion",
-                    "PublicDnsName"
                 ]
             }
         }
