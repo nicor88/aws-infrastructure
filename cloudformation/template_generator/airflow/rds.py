@@ -113,13 +113,13 @@ security_group = template.add_resource(
         VpcId=Ref(vpc_id),
         GroupDescription='Allow Postgress Traffic inside VPC',
         SecurityGroupIngress=[
+            # allow access only inside the VPC
             ec2.SecurityGroupRule(
                 IpProtocol='tcp',
                 FromPort='5432',
                 ToPort='5432',
-                CidrIp='172.31.10.0/24'
+                CidrIp='172.31.0.0/16'
             )
-            # TODO add other subnets
         ],
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
