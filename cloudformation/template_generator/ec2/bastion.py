@@ -1,5 +1,8 @@
 import boto3
 
+from troposphere import iam
+from awacs.aws import Statement, Allow, Policy, Action
+
 from troposphere import ec2
 from troposphere import Base64, Join, Output, Parameter, Ref, Tags, Template, GetAtt
 
@@ -93,6 +96,48 @@ security_group = template.add_resource(
         )
     )
 )
+
+# instance profile
+policy_doc = Policy(
+    Statement=[
+        Statement(
+            Sid='FullAccessS3',
+            Effect=Allow,
+            Action=[Action('s3', '*')
+                    ],
+            Resource=['*']
+        )
+    ]
+)
+
+instance_role = template.add_resource(
+    iam.Role(
+        'InstanceRole',
+        AssumeRolePolicyDocument={
+            'Statement': [{
+                'Effect': 'Allow',
+                'Principal': {
+                    'Service': [
+                        'ec2.amazonaws.com'
+                    ]
+                },
+                'Action': ['sts:AssumeRole']
+            }]
+        },
+
+        Policies=[
+            iam.Policy(
+                PolicyName='{}InstancePolicy'.format(STACK_NAME),
+                PolicyDocument=policy_doc,
+            ),
+        ]
+    ))
+
+instance_profile = template.add_resource(
+    iam.InstanceProfile(
+        'InstanceProfile',
+        Roles=[Ref(instance_role)],
+    ))
 
 
 # Define Instance Metadata
@@ -194,6 +239,7 @@ ec2_instance = template.add_resource(ec2.Instance(
         GroupSet=[Ref(security_group)],
         Description='Bastion Host Interface',
     )],
+    IamInstanceProfile=Ref(instance_profile),
     InstanceInitiatedShutdownBehavior='stop',
     Monitoring=True,
     Metadata=instance_metadata,
@@ -262,6 +308,9 @@ print(template_json)
 stack_args = {
     'StackName': STACK_NAME,
     'TemplateBody': template_json,
+    'Capabilities': [
+        'CAPABILITY_IAM'
+    ],
     'Tags': [
         {
             'Key': 'Purpose',
