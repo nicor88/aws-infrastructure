@@ -105,7 +105,6 @@ Resources:
             DeleteOnTermination: 'true'
             VolumeSize: '25'
             VolumeType: gp2
-      IamInstanceProfile: !Ref 'InstanceProfile'
       ImageId: !Ref 'AMI'
       InstanceInitiatedShutdownBehavior: stop
       InstanceType: t2.micro
@@ -178,29 +177,3 @@ Resources:
           Value: !Ref 'AWS::StackName'
       VpcId: !Ref 'VpcId'
     Type: AWS::EC2::SecurityGroup
-  InstanceProfile:
-    Properties:
-      Roles:
-        - !Ref 'InstanceRole'
-    Type: AWS::IAM::InstanceProfile
-  InstanceRole:
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-              - sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-      Policies:
-        - PolicyDocument:
-            Statement:
-              - Action:
-                  - s3:*
-                Effect: Allow
-                Resource:
-                  - '*'
-                Sid: FullAccessS3
-          PolicyName: bastionInstancePolicy
-    Type: AWS::IAM::Role
