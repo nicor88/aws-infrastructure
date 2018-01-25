@@ -1,0 +1,31 @@
+{
+  "family": "conda-test",
+  "taskRoleArn": "arn:aws:iam::749785218022:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "conda",
+      "image": "749785218022.dkr.ecr.eu-west-1.amazonaws.com/conda",
+      "essential": true,
+      "memoryReservation": 128,
+      "cpu": 128,
+      "command": [
+        "python",
+        "--version"
+      ],
+      "environment": [
+        {
+          "name": "EXAMPLE",
+          "value": "test"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "awslogs-conda",
+          "awslogs-region": "eu-west-1",
+          "awslogs-stream-prefix": "awslogs-conda"
+        }
+      }
+    }
+  ]
+}
