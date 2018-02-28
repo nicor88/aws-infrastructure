@@ -183,7 +183,7 @@ instance_metadata = Metadata(
 # ec2 instance
 ec2_instance = template.add_resource(ec2.Instance(
     'Bastion',
-    InstanceType='t2.micro',
+    InstanceType='t2.nano',
     ImageId=Ref(ami_id),
     NetworkInterfaces=[ec2.NetworkInterfaceProperty(
         AssociatePublicIpAddress=True,

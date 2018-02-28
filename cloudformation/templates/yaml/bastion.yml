@@ -107,7 +107,7 @@ Resources:
             VolumeType: gp2
       ImageId: !Ref 'AMI'
       InstanceInitiatedShutdownBehavior: stop
-      InstanceType: t2.micro
+      InstanceType: t2.nano
       Monitoring: 'true'
       NetworkInterfaces:
         - AssociatePublicIpAddress: 'true'
