@@ -1,0 +1,10 @@
+region: eu-west-1
+
+dynamo:
+  stack_name: dynamodb-dev
+
+s3:
+  stack_name: s3-dev
+
+# deployment
+s3_deployment_bucket: nicor-dev

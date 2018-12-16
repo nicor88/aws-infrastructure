@@ -1,4 +1,4 @@
-# Troposphere Cloudformation Templates
+# Cloudformation Templates
 
 Cloudformation templates generates with Troposphere and deployed using boto3
 

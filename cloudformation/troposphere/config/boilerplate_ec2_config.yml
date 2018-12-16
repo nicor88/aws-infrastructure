@@ -1,0 +1,6 @@
+region: eu-west-1
+ec2:
+  stack_name: boilerplate-ec2
+  instance_type: t2.micro
+  ami_version: ami-d7b9a2b1
+networking_stack_name: networking

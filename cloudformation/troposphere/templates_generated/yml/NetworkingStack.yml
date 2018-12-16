@@ -1,0 +1,200 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Stack containing Networking Resources
+Outputs:
+  AllSshSecurityGroup:
+    Description: Security group to enable SSH from Everywhere
+    Value: !Ref 'AllSSH'
+  EMRMasterSecurityGroup:
+    Description: Security group to enable some app ports for Master Node
+    Value: !Ref 'EMRMasterSecurityGroup'
+  GenericEC2Subnet:
+    Description: Public Subnet for Generic EC2 Instances
+    Value: !Ref 'EC2PublicSubnet'
+  GenericEMRSubnet:
+    Description: Public Subnet for Generic EMR Cluster
+    Value: !Ref 'GenericEMRSubnet'
+  GenericPublicSubnetEuWest1b:
+    Description: Public Subnet for Generic Purposes in eu-west-1b
+    Value: !Ref 'GenericPublicSubnetEuWest1b'
+  GenericPublicSubnetEuWest1c:
+    Description: Public Subnet for Generic Purposes in eu-west-1c
+    Value: !Ref 'GenericPublicSubnetEuWest1c'
+  JupyterEMRSubnet:
+    Description: Public Subnet for Jupyter EMR Cluster
+    Value: !Ref 'GenericEMRSubnet'
+  PostgresSecurityGroup:
+    Description: Security group to enable connection to Postgres from Everywhere
+    Value: !Ref 'PostgresSecurityGroup'
+  RedshiftSecurityGroup:
+    Description: Security group to enable connection to Redshift from Everywhere
+    Value: !Ref 'RedshiftSecurityGroup'
+Resources:
+  AllSSH:
+    Properties:
+      GroupDescription: Allow SSH traffic from Everywhere
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '22'
+          IpProtocol: tcp
+          ToPort: '22'
+      Tags:
+        - Key: Name
+          Value: all-ssh-sg
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::SecurityGroup
+  EC2PublicSubnet:
+    Properties:
+      AvailabilityZone: us-east-1a
+      CidrBlock: 172.31.1.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+        - Key: AZ
+          Value: us-east-1
+        - Key: Name
+          Value: generic-ec2-public-subnet-us-east-1a
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::Subnet
+  EMRMasterSecurityGroup:
+    Properties:
+      GroupDescription: Enable Apps port for Master Node
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '22'
+          IpProtocol: tcp
+          ToPort: '22'
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '80'
+          IpProtocol: tcp
+          ToPort: '80'
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '8088'
+          IpProtocol: tcp
+          ToPort: '8088'
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '18080'
+          IpProtocol: tcp
+          ToPort: '18080'
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '8888'
+          IpProtocol: tcp
+          ToPort: '8888'
+      Tags:
+        - Key: Name
+          Value: emr-master-sg
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::SecurityGroup
+  GenericEC2SubnetRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-cb8c7bb3
+      SubnetId: !Ref 'EC2PublicSubnet'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  GenericEMRSubnet:
+    Properties:
+      AvailabilityZone: us-east-1a
+      CidrBlock: 172.31.2.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+        - Key: AZ
+          Value: us-east-1
+        - Key: Name
+          Value: generic-emr-public-subnet
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::Subnet
+  GenericEMRSubnetRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-cb8c7bb3
+      SubnetId: !Ref 'GenericEMRSubnet'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  GenericPublicSubnetEuWest1b:
+    Properties:
+      AvailabilityZone: eu-west-1b
+      CidrBlock: 172.31.64.0/24
+      Tags:
+        - Key: AZ
+          Value: us-east-1b
+        - Key: Name
+          Value: generic-public-subnet-us-east-1b
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::Subnet
+  GenericPublicSubnetEuWest1bRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-cb8c7bb3
+      SubnetId: !Ref 'GenericPublicSubnetEuWest1b'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  GenericPublicSubnetEuWest1c:
+    Properties:
+      AvailabilityZone: eu-west-1c
+      CidrBlock: 172.31.128.0/24
+      Tags:
+        - Key: AZ
+          Value: us-east-1c
+        - Key: Name
+          Value: generic-public-subnet-{cfg["region"]}c
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::Subnet
+  GenericPublicSubnetEuWest1cRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-cb8c7bb3
+      SubnetId: !Ref 'GenericPublicSubnetEuWest1c'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  JupyterEMRSubnet:
+    Properties:
+      AvailabilityZone: us-east-1a
+      CidrBlock: 172.31.3.0/24
+      MapPublicIpOnLaunch: 'true'
+      Tags:
+        - Key: AZ
+          Value: us-east-1
+        - Key: Name
+          Value: jupyter-emr-public-subnet
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::Subnet
+  JupyterEMRSubnetRouteTableAssociation:
+    Properties:
+      RouteTableId: rtb-cb8c7bb3
+      SubnetId: !Ref 'JupyterEMRSubnet'
+    Type: AWS::EC2::SubnetRouteTableAssociation
+  PostgresSecurityGroup:
+    Properties:
+      GroupDescription: Postgres Security Group
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '5432'
+          IpProtocol: tcp
+          ToPort: '5432'
+      Tags:
+        - Key: Name
+          Value: postgres-sg
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::SecurityGroup
+  RedshiftSecurityGroup:
+    Properties:
+      GroupDescription: Redshift Security Group
+      SecurityGroupIngress:
+        - CidrIp: '0.0.0.0/0'
+          FromPort: '5439'
+          IpProtocol: tcp
+          ToPort: '5439'
+      Tags:
+        - Key: Name
+          Value: redshift-sg
+        - Key: StackName
+          Value: !Ref 'AWS::StackName'
+      VpcId: vpc-4361833a
+    Type: AWS::EC2::SecurityGroup

@@ -1,0 +1,5 @@
+stack_name: networking
+region: 'us-east-1'
+default_subnet_availability_zone: 'us-east-1a'
+vpc_id: 'vpc-4361833a'
+public_route_table: 'rtb-cb8c7bb3'
