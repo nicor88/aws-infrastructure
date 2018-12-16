@@ -28,7 +28,7 @@ generic_ec2_public_subnet = template.add_resource(
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
             AZ=cfg['region'],
-            Name='generic-ec2-public-subnet'
+            Name=f'generic-ec2-public-subnet-{cfg["default_subnet_availability_zone"]}'
         )
     )
 )
@@ -48,8 +48,8 @@ generic_public_subnet_eu_west_1b = template.add_resource(
         VpcId=cfg['vpc_id'],
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
-            AZ='eu-west-1b',
-            Name='generic-public-subnet-eu-west-1b'
+            AZ=f'{cfg["region"]}b',
+            Name=f'generic-public-subnet-{cfg["region"]}b'
         )
     )
 )
@@ -69,8 +69,8 @@ generic_public_subnet_eu_west_1c = template.add_resource(
         VpcId=cfg['vpc_id'],
         Tags=Tags(
             StackName=Ref('AWS::StackName'),
-            AZ='eu-west-1c',
-            Name='generic-public-subnet-eu-west-1c'
+            AZ=f'{cfg["region"]}c',
+            Name='generic-public-subnet-{cfg["region"]}c'
         )
     )
 )

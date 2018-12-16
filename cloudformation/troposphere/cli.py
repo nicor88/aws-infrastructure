@@ -35,8 +35,6 @@ if __name__ == "__main__":
     template_generator = vars(args).get('template_generator')
     aws_profile = vars(args).get('aws_profile')
     action = vars(args).get('action')
-    os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
-    os.environ['AWS_PROFILE'] = aws_profile
     template_generator_path = os.path.join(os.getcwd(), 'templates_generator',
                                            template_generator)
     file_to_execute = f'{template_generator_path}.py'
