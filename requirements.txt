@@ -1,0 +1,5 @@
+awscli==1.16.76
+boto3==1.9.66
+cfn-flip==1.1.0
+pyyaml==3.13
+troposphere==2.3.4

@@ -1,5 +1,5 @@
 import emr.utils.steps as steps
-import cloudformation.utils as utils
+import cloudformation.troposphere.utils as utils
 
 
 def add_steps_with_termination(*, cluster_id):

@@ -1,7 +1,8 @@
-# General python ignore
+# python
 */.ipynb_checkpoints/
 */__pycache__/
 *.pyc
+venv/
 
 # Dist
 dist
@@ -14,5 +15,5 @@ snippets
 /.idea
 
 # Terraform
-*.tfplan
-*.terraform
+terraform/*.tfstate
+terraform/*.tfstate.backup
