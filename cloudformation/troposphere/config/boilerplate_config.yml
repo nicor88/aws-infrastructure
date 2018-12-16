@@ -1,2 +1,2 @@
-region: 'eu-west-1'
-stack_name: BoilerplateStack
+region: eu-west-1
+stack_name: boilerplate

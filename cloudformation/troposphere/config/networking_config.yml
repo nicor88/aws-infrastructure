@@ -1,4 +1,4 @@
-stack_name: NetworkingStack
+stack_name: networking
 region: 'us-east-1'
 default_subnet_availability_zone: 'us-east-1a'
 vpc_id: 'vpc-4361833a'
