@@ -11,14 +11,17 @@ To manage different profiles create a file __~/.aws/credentials__ with this cont
 <pre>[default]
 aws_access_key_id=foo
 aws_secret_access_key=bar
+region = us-east-1
 
-[nicor88]
+[your_other_profile]
 aws_access_key_id=foo2
 aws_secret_access_key=bar2
+region = us-east-1
 </pre>
 
-In setup this env variables, to work with a specific profile:
-<pre>import os
-os.environ["AWS_PROFILE"] = "nicor88"
-os.environ["AWS_DEFAULT_REGION"] = "eu-west-1"
+To point to the right profile use ENV variables
+<pre>
+export AWS_PROFILE=your_other_profile
+# this will overwrite the region in the profile configuration
+export AWS_DEFAULT_REGION=eu-west-1
 </pre>
